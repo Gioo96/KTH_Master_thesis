@@ -1,6 +1,8 @@
 % CasADi
 import casadi.*
 
+% Human arm parameters
+run('human_arm_param.m');
 %% FORWARD KINEMATICS
 
 % Name the markers which are placed in the shoulder, forearm and hand
@@ -74,11 +76,43 @@ f_Phi = Function('f_Phi', {forward_kinematics.q, forward_kinematics.shou_vars, f
 %% JACOBIAN
 
 % Jacobian computation
-jacobian.J = jacobian(forward_kinematics.Phi, forward_kinematics.q);
+jacob.J = jacobian(forward_kinematics.Phi, forward_kinematics.q);
 
 % Jacobian function
-f_J = Function('f_J', {forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars}, {jacobian.J});
+f_J = Function('f_J', {forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars}, {jacob.J});
 
+%% JACOBIAN PSEUDOINVERSE
+
+% PseudoInverse computation
+jacob.Jpseudo = pinv(jacob.J);
+
+% PseudoInverse function
+f_Jpseudo = Function('f_Jpseudo', {forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars}, {jacob.Jpseudo});
+
+%% Discretization Runge-Kutta
+
+sample_Time = 0.01; 
+discrete.u = SX.sym('u', [m * 3, 1]);
+discrete.qdot = jacob.Jpseudo * discrete.u;
+
+% Function
+f_RungeKutta = Function('f_RungeKutta', {forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u}, {discrete.qdot});
+
+%% qk+1 = qk + 1/6*Ts*(k1 + 2k2 + 2k3 + k4) ---> qk+1 = f(qk, uk)
+
+discrete.k1 = f_RungeKutta(forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u);
+discrete.k2 = f_RungeKutta(forward_kinematics.q + sample_Time*discrete.k1/2, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u);
+discrete.k3 = f_RungeKutta(forward_kinematics.q + sample_Time*discrete.k2/2, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u);
+discrete.k4 = f_RungeKutta(forward_kinematics.q + sample_Time*discrete.k3, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u);
+
+% Function f computation
+discrete.f = forward_kinematics.q + 1/6*sample_Time*(discrete.k1 + 2*discrete.k2 + 2*discrete.k3 + discrete.k4);
+
+% Jacobians A, B computation
+discrete.A = jacobian(discrete.f, forward_kinematics.q);
+discrete.B = jacobian(discrete.f, discrete.u);
+% Function
+%f_f = Function('f_f', {forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.pdot}, {discrete.qdot});
 
 %% Generate the mex functions
 
@@ -87,6 +121,10 @@ f_Phi.generate('f_Phi_mex.c', opts);
 mex f_Phi_mex.c
 f_J.generate('f_J_mex.c', opts);
 mex f_J_mex.c
+f_Jpseudo.generate('f_Jpseudo_mex.c', opts);
+mex f_Jpseudo_mex.c
+f_RungeKutta.generate('f_RungeKutta_mex.c', opts);
+mex f_RungeKutta_mex.c
 
 %% Functions declaration
 
