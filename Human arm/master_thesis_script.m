@@ -109,11 +109,18 @@ discrete.k4 = f_RungeKutta(forward_kinematics.q + sample_Time*discrete.k3, forwa
 discrete.f = forward_kinematics.q + 1/6*sample_Time*(discrete.k1 + 2*discrete.k2 + 2*discrete.k3 + discrete.k4);
 
 % Jacobians A, B computation
-discrete.A = jacobian(discrete.f, forward_kinematics.q);
-discrete.B = jacobian(discrete.f, discrete.u);
-% Function
-%f_f = Function('f_f', {forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.pdot}, {discrete.qdot});
+discrete.A_symb = jacobian(discrete.f, forward_kinematics.q);
+discrete.B_symb = jacobian(discrete.f, discrete.u);
 
+% Function A, B, f
+f_f = Function('f_f', {forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u}, {discrete.f});
+f_A = Function('f_A', {forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u}, {discrete.A_symb});
+f_B = Function('f_B', {forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u}, {discrete.B_symb});
+
+% A matrix evaluated at the equilibrium point q = 0, u = 0;
+discrete_linearized.A = full(f_A(zeros(n, 1), marker.shoulder_variables, marker.forearm_variables, marker.hand_variables, zeros(3*m, 1)));
+% B matrix evaluated at the equilibrium point q = 0, u = 0;
+discrete_linearized.B = full(f_B(zeros(n, 1), marker.shoulder_variables, marker.forearm_variables, marker.hand_variables, zeros(3*m, 1)));
 %% Generate the mex functions
 
 opts = struct('main', true, 'mex', true);
