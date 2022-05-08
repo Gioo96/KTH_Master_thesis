@@ -90,6 +90,7 @@ jacob.Jpseudo = pinv(jacob.J);
 f_Jpseudo = Function('f_Jpseudo', {forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars}, {jacob.Jpseudo});
 
 %% Discretization Runge-Kutta
+% qk+1 = qk + 1/6*Ts*(k1 + 2k2 + 2k3 + k4) ---> qk+1 = f(qk, uk)
 
 sample_Time = 0.01; 
 discrete.u = SX.sym('u', [m * 3, 1]);
@@ -97,8 +98,6 @@ discrete.qdot = jacob.Jpseudo * discrete.u;
 
 % Function
 f_RungeKutta = Function('f_RungeKutta', {forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u}, {discrete.qdot});
-
-%% qk+1 = qk + 1/6*Ts*(k1 + 2k2 + 2k3 + k4) ---> qk+1 = f(qk, uk)
 
 discrete.k1 = f_RungeKutta(forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u);
 discrete.k2 = f_RungeKutta(forward_kinematics.q + sample_Time*discrete.k1/2, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u);
@@ -108,7 +107,9 @@ discrete.k4 = f_RungeKutta(forward_kinematics.q + sample_Time*discrete.k3, forwa
 % Function f computation
 discrete.f = forward_kinematics.q + 1/6*sample_Time*(discrete.k1 + 2*discrete.k2 + 2*discrete.k3 + discrete.k4);
 
-% Jacobians A, B computation
+%% Linearization around eq. point (eq. point : q_eq = 0, u_eq = 0)
+% qk+1 = Aqk + Buk
+% pk = Cqk + Duk
 discrete.A_symb = jacobian(discrete.f, forward_kinematics.q);
 discrete.B_symb = jacobian(discrete.f, discrete.u);
 
@@ -117,10 +118,18 @@ f_f = Function('f_f', {forward_kinematics.q, forward_kinematics.shou_vars, forwa
 f_A = Function('f_A', {forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u}, {discrete.A_symb});
 f_B = Function('f_B', {forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u}, {discrete.B_symb});
 
-% A matrix evaluated at the equilibrium point q = 0, u = 0;
+% A matrix --> df/dq evaluated at the equilibrium point q_eq = 0, u_eq = 0
 discrete_linearized.A = full(f_A(zeros(n, 1), marker.shoulder_variables, marker.forearm_variables, marker.hand_variables, zeros(3*m, 1)));
-% B matrix evaluated at the equilibrium point q = 0, u = 0;
+% B matrix --> df/du evaluated at the equilibrium point q_eq = 0, u_eq = 0
 discrete_linearized.B = full(f_B(zeros(n, 1), marker.shoulder_variables, marker.forearm_variables, marker.hand_variables, zeros(3*m, 1)));
+
+% C matrix --> dPhi/dq (Jacobian J) evaluated at the equilibrium point q_eq = 0
+discrete_linearized.C = full(f_J(zeros(n, 1), marker.shoulder_variables, marker.forearm_variables, marker.hand_variables));
+% D matrix --> dPhi/du = 0 evaluated at the equilibrium point q_eq = 0, u_eq = 0
+discrete_linearized.D = zeros(3*m, 3*m);
+
+% Set initial condition
+discrete_linearized.q0 = zeros(n, 1);
 %% Generate the mex functions
 
 opts = struct('main', true, 'mex', true);
