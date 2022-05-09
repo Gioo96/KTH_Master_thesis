@@ -36,7 +36,7 @@ noise.p_var = 0.00001 * ones(m * 3, 1);
 noise.p_seed = 1;
 noise.pdot_seed = 2;
 
-% Simulation IC [deg]
+% Simulation IC [rad]
 simulation.q0 = zeros(n, 1);
 
 %% FORWARD KINEMATICS
