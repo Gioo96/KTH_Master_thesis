@@ -3,6 +3,42 @@ import casadi.*
 
 % Human arm parameters
 run('human_arm_param.m');
+
+%% Set parameters
+% Marker is placed in the : shoulder --> 1
+%                           forearm  --> 2
+%                           hand     --> 3
+marker.links = [1;
+                1;
+                1;
+                1;
+                2;
+                2;
+                2;
+                3;
+                3];
+marker.shoulder_variables = [arm.shoulder.radius+arm.markers.radius -3/4*arm.shoulder.length 0;
+                   -arm.shoulder.radius-arm.markers.radius -3/4*arm.shoulder.length 0;
+                   arm.shoulder.radius+arm.markers.radius -1/4*arm.shoulder.length 0;
+                   -arm.shoulder.radius-arm.markers.radius -1/4*arm.shoulder.length 0]';
+marker.forearm_variables = [arm.forearm.radius+arm.markers.radius -3/4*arm.forearm.length 0;
+                   -arm.forearm.radius-arm.markers.radius -1/2*arm.forearm.length 0;
+                   arm.forearm.radius+arm.markers.radius -1/4*arm.forearm.length 0]';
+marker.hand_variables = [0 -3/4*arm.hand.dimensions(2) arm.hand.dimensions(3)/2+arm.markers.radius;
+                   0 -1/4*arm.hand.dimensions(2) arm.hand.dimensions(3)/2+arm.markers.radius]';
+
+% Number of markers
+m = size(marker.links, 1);
+
+% Noise
+noise.sampleTime = 0.01;
+noise.p_var = 0.00001 * ones(m * 3, 1);
+noise.p_seed = 1;
+noise.pdot_seed = 2;
+
+% Simulation IC [deg]
+simulation.q0 = zeros(n, 1);
+
 %% FORWARD KINEMATICS
 
 % Name the markers which are placed in the shoulder, forearm and hand
