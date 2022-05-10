@@ -166,6 +166,27 @@ discrete_linearized.D = zeros(3*m, 3*m);
 
 % Set initial condition
 discrete_linearized.q0 = zeros(n, 1);
+
+%% trial
+trial.A = full(f_A(zeros(n, 1), marker.shoulder_variables, marker.forearm_variables, marker.hand_variables, zeros(3*m, 1)));
+trial.B = full(f_B(zeros(n, 1), marker.shoulder_variables, marker.forearm_variables, marker.hand_variables, zeros(3*m, 1)));
+trial.C = [full(f_J(zeros(n, 1), marker.shoulder_variables, marker.forearm_variables, marker.hand_variables)); eye(n)];
+trial.D = zeros(3*m+n, 3*m);
+
+%% Full-order state observer
+
+% Check is the pair (A, C) is observable
+state_observer.obs_matrix = obsv(discrete_linearized.A, discrete_linearized.C);
+if (rank(state_observer.obs_matrix) == n)
+    disp("The pair (A, C) is observable");
+end
+
+% Pole allocation
+state_observer.eigs = zeros(n, 1);
+
+% Compute L s.t. A+LH has the desired poles
+state_observer.L = place(discrete_linearized.A', -discrete_linearized.C', state_observer.eigs)';
+
 %% Generate the mex functions
 
 opts = struct('main', true, 'mex', true);
