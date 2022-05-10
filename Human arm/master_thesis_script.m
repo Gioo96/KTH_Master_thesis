@@ -175,11 +175,8 @@ trial.D = zeros(3*m+n, 3*m);
 
 %% Full-order state observer
 
-% Check is the pair (A, C) is observable
+% The pair (A, C) is observable
 state_observer.obs_matrix = obsv(discrete_linearized.A, discrete_linearized.C);
-if (rank(state_observer.obs_matrix) == n)
-    disp("The pair (A, C) is observable");
-end
 
 % Pole allocation
 state_observer.eigs = zeros(n, 1);
