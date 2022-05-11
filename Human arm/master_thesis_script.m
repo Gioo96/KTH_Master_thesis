@@ -31,10 +31,12 @@ marker.hand_variables = [0 -3/4*arm.hand.dimensions(2) arm.hand.dimensions(3)/2+
 m = size(marker.links, 1);
 
 % Noise
-noise.sampleTime = 0.01;
-noise.p_var = 0.00001 * ones(m * 3, 1);
-noise.p_seed = 1;
-noise.pdot_seed = 2;
+noise.measurement_var = 0.00001 * ones(m * 3, 1);
+noise.measurement_seed = 1;
+noise.input_seed = 2;
+
+% Sampling time
+sample_Time = 0.01;
 
 % Simulation IC [rad]
 simulation.q0 = zeros(n, 1);
@@ -127,8 +129,7 @@ f_Jpseudo = Function('f_Jpseudo', {forward_kinematics.q, forward_kinematics.shou
 
 %% Discretization Runge-Kutta
 % qk+1 = qk + 1/6*Ts*(k1 + 2k2 + 2k3 + k4) ---> qk+1 = f(qk, uk)
-
-sample_Time = 0.01; 
+ 
 discrete.u = SX.sym('u', [m * 3, 1]);
 discrete.qdot = jacob.Jpseudo * discrete.u;
 
@@ -144,45 +145,52 @@ discrete.k4 = f_RungeKutta(forward_kinematics.q + sample_Time*discrete.k3, forwa
 discrete.f = forward_kinematics.q + 1/6*sample_Time*(discrete.k1 + 2*discrete.k2 + 2*discrete.k3 + discrete.k4);
 
 %% Linearization around eq. point (eq. point : q_eq = 0, u_eq = 0)
-% qk+1 = Aqk + Buk
-% pk = Cqk + Duk
-discrete.A_symb = jacobian(discrete.f, forward_kinematics.q);
-discrete.B_symb = jacobian(discrete.f, discrete.u);
+% qk+1 = Fqk + Guk
+% pk = Hqk + Juk
 
-% Function A, B, f
+% Equilibrium point
+equilibrium.q = zeros(n, 1);
+equilibrium.u = zeros(3*m, 1);
+
+% F, G in terms of symbolic variables
+discrete.F_symb = jacobian(discrete.f, forward_kinematics.q);
+discrete.G_symb = jacobian(discrete.f, discrete.u);
+
+% Function F, G, f
 f_f = Function('f_f', {forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u}, {discrete.f});
-f_A = Function('f_A', {forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u}, {discrete.A_symb});
-f_B = Function('f_B', {forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u}, {discrete.B_symb});
+f_F = Function('f_F', {forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u}, {discrete.F_symb});
+f_G = Function('f_G', {forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u}, {discrete.G_symb});
 
-% A matrix --> df/dq evaluated at the equilibrium point q_eq = 0, u_eq = 0
-discrete_linearized.A = full(f_A(zeros(n, 1), marker.shoulder_variables, marker.forearm_variables, marker.hand_variables, zeros(3*m, 1)));
-% B matrix --> df/du evaluated at the equilibrium point q_eq = 0, u_eq = 0
-discrete_linearized.B = full(f_B(zeros(n, 1), marker.shoulder_variables, marker.forearm_variables, marker.hand_variables, zeros(3*m, 1)));
+% F matrix --> df/dq evaluated at the equilibrium point q_eq = 0, u_eq = 0
+model.kf.F = full(f_F(equilibrium.q, marker.shoulder_variables, marker.forearm_variables, marker.hand_variables, equilibrium.u));
+% G matrix --> df/du evaluated at the equilibrium point q_eq = 0, u_eq = 0
+model.kf.G = full(f_G(equilibrium.q, marker.shoulder_variables, marker.forearm_variables, marker.hand_variables, equilibrium.u));
 
-% C matrix --> dPhi/dq (Jacobian J) evaluated at the equilibrium point q_eq = 0
-discrete_linearized.C = full(f_J(zeros(n, 1), marker.shoulder_variables, marker.forearm_variables, marker.hand_variables));
-% D matrix --> dPhi/du = 0 evaluated at the equilibrium point q_eq = 0, u_eq = 0
-discrete_linearized.D = zeros(3*m, 3*m);
+% H matrix --> dPhi/dq (Jacobian J) evaluated at the equilibrium point q_eq = 0
+model.kf.H = full(f_J(equilibrium.q, marker.shoulder_variables, marker.forearm_variables, marker.hand_variables));
+% J matrix --> dPhi/du = 0 evaluated at the equilibrium point q_eq = 0, u_eq = 0
+model.kf.J = zeros(3*m, 3*m);
 
 % Set initial condition
-discrete_linearized.q0 = zeros(n, 1);
+model.kf.q0 = zeros(n, 1);
 
 %% trial
-trial.A = full(f_A(zeros(n, 1), marker.shoulder_variables, marker.forearm_variables, marker.hand_variables, zeros(3*m, 1)));
-trial.B = full(f_B(zeros(n, 1), marker.shoulder_variables, marker.forearm_variables, marker.hand_variables, zeros(3*m, 1)));
-trial.C = [full(f_J(zeros(n, 1), marker.shoulder_variables, marker.forearm_variables, marker.hand_variables)); eye(n)];
-trial.D = zeros(3*m+n, 3*m);
+
+trial.F = full(f_F(zeros(n, 1), marker.shoulder_variables, marker.forearm_variables, marker.hand_variables, zeros(3*m, 1)));
+trial.G = full(f_G(zeros(n, 1), marker.shoulder_variables, marker.forearm_variables, marker.hand_variables, zeros(3*m, 1)));
+trial.H = [full(f_J(zeros(n, 1), marker.shoulder_variables, marker.forearm_variables, marker.hand_variables)); eye(n)];
+trial.J = zeros(3*m+n, 3*m);
 
 %% Full-order state observer
 
-% The pair (A, C) is observable
-state_observer.obs_matrix = obsv(discrete_linearized.A, discrete_linearized.C);
+% The pair (F, H) is observable
+state_observer.obs_matrix = obsv(model.kf.F, model.kf.H);
 
 % Pole allocation
 state_observer.eigs = zeros(n, 1);
 
-% Compute L s.t. A+LH has the desired poles
-state_observer.L = place(discrete_linearized.A', -discrete_linearized.C', state_observer.eigs)';
+% Compute L s.t. F+LH has the desired poles
+state_observer.L = place(model.kf.F', -model.kf.H', state_observer.eigs)';
 
 %% Generate the mex functions
 
