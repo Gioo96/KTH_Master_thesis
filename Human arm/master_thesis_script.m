@@ -192,6 +192,10 @@ state_observer.eigs = zeros(n, 1);
 % Compute L s.t. F+LH has the desired poles
 state_observer.L = place(model.kf.F', -model.kf.H', state_observer.eigs)';
 
+%% Uncomment Kalman Filter function
+
+set_param('master_thesis_simulink/Kalman Filter','commented','on');
+
 %% Generate the mex functions
 
 opts = struct('main', true, 'mex', true);
