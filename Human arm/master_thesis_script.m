@@ -5,6 +5,16 @@ import casadi.*
 run('human_arm_param.m');
 
 %% Set parameters
+
+% Sampling time
+sample_Time = 0.01;
+
+% Simulation time
+simulink.time = 4.5;
+
+% Simulation IC [rad]
+simulink.q0 = zeros(n, 1);
+
 % Marker is placed in the : shoulder --> 1
 %                           forearm  --> 2
 %                           hand     --> 3
@@ -30,16 +40,20 @@ marker.hand_variables = [0 -3/4*arm.hand.dimensions(2) arm.hand.dimensions(3)/2+
 % Number of markers
 m = size(marker.links, 1);
 
-% Noise
-noise.measurement_var = 0.00001 * ones(m * 3, 1);
+% Noise (TO BE ESTIMATED)
+noise.measurement_var = 0.00001 * ones(m*3, 1);
 noise.measurement_seed = 1;
+noise.input_var = 0.0000001 * ones(m*3, 1);
 noise.input_seed = 2;
 
-% Sampling time
-sample_Time = 0.01;
+% Uncomment Kalman Filter function
+set_param('master_thesis_simulink/Kalman Filter','commented','on');
 
-% Simulation IC [rad]
-simulation.q0 = zeros(n, 1);
+% Uncomment Linearized Discrete model
+set_param('master_thesis_simulink/Linearized Discrete model','commented','on');
+
+% Uncomment State-Observer
+set_param('master_thesis_simulink/State-observer','commented','on');
 
 %% FORWARD KINEMATICS
 
@@ -70,31 +84,31 @@ for i = 1 : m
 end
 
 % Forward kinematics initialization
-forward_kinematics.Phi = SX.sym('phi', [m * 3, 1]);
+model.Phi = SX.sym('phi', [m * 3, 1]);
 
 % SHOULDER, FOREARM, HAND variables
-forward_kinematics.shou_vars = [];
-forward_kinematics.fore_vars = [];
-forward_kinematics.hand_vars = [];
+model.arm_parameters.shou_vars = [];
+model.arm_parameters.fore_vars = [];
+model.arm_parameters.hand_vars = [];
 % Joint variables
-forward_kinematics.q = SX.sym('q', [n, 1]);
+model.q = SX.sym('q', [n, 1]);
 
 % Forward kinematics computation
 % SHOULDER
 for s = 1 : size(marker.m_shoulder_str, 2)
     
-    [T, variable] = shoulder_Phi(char(marker.m_shoulder_str(s)), forward_kinematics.q);
-    forward_kinematics.shou_vars = [forward_kinematics.shou_vars, variable];
-    forward_kinematics.Phi((s-1)*3+1 : (s-1)*3+3) = T(1:3, 4);
+    [T, variable] = shoulder_Phi(char(marker.m_shoulder_str(s)), model.q);
+    model.arm_parameters.shou_vars = [model.arm_parameters.shou_vars, variable];
+    model.Phi((s-1)*3+1 : (s-1)*3+3) = T(1:3, 4);
 end
 
 % FOREARM
 i = 1;
 for f = size(marker.m_shoulder_str, 2)+1 : size(marker.m_shoulder_str, 2)+size(marker.m_forearm_str, 2)
     
-    [T, variable] = forearm_Phi(char(marker.m_forearm_str(i)), forward_kinematics.q);
-    forward_kinematics.fore_vars = [forward_kinematics.fore_vars, variable];
-    forward_kinematics.Phi((f-1)*3+1 : (f-1)*3+3) = T(1:3, 4);
+    [T, variable] = forearm_Phi(char(marker.m_forearm_str(i)), model.q);
+    model.arm_parameters.fore_vars = [model.arm_parameters.fore_vars, variable];
+    model.Phi((f-1)*3+1 : (f-1)*3+3) = T(1:3, 4);
     i = i + 1;
 end
 
@@ -102,111 +116,82 @@ end
 j = 1;
 for h = size(marker.m_shoulder_str, 2)+size(marker.m_forearm_str, 2)+1 : size(marker.m_shoulder_str, 2)+size(marker.m_forearm_str, 2)+size(marker.m_hand_str, 2)
 
-    [T, variable] = hand_Phi(char(marker.m_hand_str(j)), forward_kinematics.q);
-    forward_kinematics.hand_vars = [forward_kinematics.hand_vars, variable];
-    forward_kinematics.Phi((h-1)*3+1 : (h-1)*3+3) = T(1:3, 4);
+    [T, variable] = hand_Phi(char(marker.m_hand_str(j)), model.q);
+    model.arm_parameters.hand_vars = [model.arm_parameters.hand_vars, variable];
+    model.Phi((h-1)*3+1 : (h-1)*3+3) = T(1:3, 4);
     j = j + 1;
 end
 
 % Phi function
-f_Phi = Function('f_Phi', {forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars}, {forward_kinematics.Phi});
+functions.f_Phi = Function('f_Phi', {model.q, model.arm_parameters.shou_vars, model.arm_parameters.fore_vars, model.arm_parameters.hand_vars}, {model.Phi});
 
 %% JACOBIAN
 
 % Jacobian computation
-jacob.J = jacobian(forward_kinematics.Phi, forward_kinematics.q);
+model.J = jacobian(model.Phi, model.q);
 
 % Jacobian function
-f_J = Function('f_J', {forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars}, {jacob.J});
+functions.f_J = Function('f_J', {model.q, model.arm_parameters.shou_vars, model.arm_parameters.fore_vars, model.arm_parameters.hand_vars}, {model.J});
 
 %% JACOBIAN PSEUDOINVERSE
 
 % PseudoInverse computation
-jacob.Jpseudo = pinv(jacob.J);
+model.Jpseudo = pinv(model.J);
 
 % PseudoInverse function
-f_Jpseudo = Function('f_Jpseudo', {forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars}, {jacob.Jpseudo});
+functions.f_Jpseudo = Function('f_Jpseudo', {model.q, model.arm_parameters.shou_vars, model.arm_parameters.fore_vars, model.arm_parameters.hand_vars}, {model.Jpseudo});
 
 %% Discretization Runge-Kutta
 % qk+1 = qk + 1/6*Ts*(k1 + 2k2 + 2k3 + k4) ---> qk+1 = f(qk, uk)
  
-discrete.u = SX.sym('u', [m * 3, 1]);
-discrete.qdot = jacob.Jpseudo * discrete.u;
+% qdot = Jpseudo * u
+rk.u = SX.sym('u', [m*3, 1]);
+rk.qdot = model.Jpseudo * rk.u;
 
-% Function
-f_RungeKutta = Function('f_RungeKutta', {forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u}, {discrete.qdot});
+% Function used to compute k1, k2, k3, k4
+functions.f_RungeKutta = Function('f_RungeKutta', {model.q, model.arm_parameters.shou_vars, model.arm_parameters.fore_vars, model.arm_parameters.hand_vars, rk.u}, {rk.qdot});
 
-discrete.k1 = f_RungeKutta(forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u);
-discrete.k2 = f_RungeKutta(forward_kinematics.q + sample_Time*discrete.k1/2, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u);
-discrete.k3 = f_RungeKutta(forward_kinematics.q + sample_Time*discrete.k2/2, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u);
-discrete.k4 = f_RungeKutta(forward_kinematics.q + sample_Time*discrete.k3, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u);
+% k1, k2, k3, k4 computation
+rk.k1 = functions.f_RungeKutta(model.q, model.arm_parameters.shou_vars, model.arm_parameters.fore_vars, model.arm_parameters.hand_vars, rk.u);
+rk.k2 = functions.f_RungeKutta(model.q + sample_Time*rk.k1/2, model.arm_parameters.shou_vars, model.arm_parameters.fore_vars, model.arm_parameters.hand_vars, rk.u);
+rk.k3 = functions.f_RungeKutta(model.q + sample_Time*rk.k2/2, model.arm_parameters.shou_vars, model.arm_parameters.fore_vars, model.arm_parameters.hand_vars, rk.u);
+rk.k4 = functions.f_RungeKutta(model.q + sample_Time*rk.k3, model.arm_parameters.shou_vars, model.arm_parameters.fore_vars, model.arm_parameters.hand_vars, rk.u);
 
 % Function f computation
-discrete.f = forward_kinematics.q + 1/6*sample_Time*(discrete.k1 + 2*discrete.k2 + 2*discrete.k3 + discrete.k4);
+model.f = model.q + 1/6*sample_Time*(rk.k1 + 2*rk.k2 + 2*rk.k3 + rk.k4);
+functions.f_f = Function('f_f', {model.q, model.arm_parameters.shou_vars, model.arm_parameters.fore_vars, model.arm_parameters.hand_vars, rk.u}, {model.f});
 
 %% Linearization around eq. point (eq. point : q_eq = 0, u_eq = 0)
 % qk+1 = Fqk + Guk
 % pk = Hqk + Juk
 
-% Equilibrium point
-equilibrium.q = zeros(n, 1);
-equilibrium.u = zeros(3*m, 1);
-
 % F, G in terms of symbolic variables
-discrete.F_symb = jacobian(discrete.f, forward_kinematics.q);
-discrete.G_symb = jacobian(discrete.f, discrete.u);
+model.linearized.F_symb = jacobian(model.f, model.q);
+model.linearized.G_symb = jacobian(model.f, rk.u);
 
-% Function F, G, f
-f_f = Function('f_f', {forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u}, {discrete.f});
-f_F = Function('f_F', {forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u}, {discrete.F_symb});
-f_G = Function('f_G', {forward_kinematics.q, forward_kinematics.shou_vars, forward_kinematics.fore_vars, forward_kinematics.hand_vars, discrete.u}, {discrete.G_symb});
+% Function F, G
+functions.f_F = Function('f_F', {model.q, model.arm_parameters.shou_vars, model.arm_parameters.fore_vars, model.arm_parameters.hand_vars, rk.u}, {model.linearized.F_symb});
+functions.f_G = Function('f_G', {model.q, model.arm_parameters.shou_vars, model.arm_parameters.fore_vars, model.arm_parameters.hand_vars, rk.u}, {model.linearized.G_symb});
 
-% F matrix --> df/dq evaluated at the equilibrium point q_eq = 0, u_eq = 0
-model.kf.F = full(f_F(equilibrium.q, marker.shoulder_variables, marker.forearm_variables, marker.hand_variables, equilibrium.u));
-% G matrix --> df/du evaluated at the equilibrium point q_eq = 0, u_eq = 0
-model.kf.G = full(f_G(equilibrium.q, marker.shoulder_variables, marker.forearm_variables, marker.hand_variables, equilibrium.u));
-
-% H matrix --> dPhi/dq (Jacobian J) evaluated at the equilibrium point q_eq = 0
-model.kf.H = full(f_J(equilibrium.q, marker.shoulder_variables, marker.forearm_variables, marker.hand_variables));
-% J matrix --> dPhi/du = 0 evaluated at the equilibrium point q_eq = 0, u_eq = 0
-model.kf.J = zeros(3*m, 3*m);
-
-% Set initial condition
-model.kf.q0 = zeros(n, 1);
-
-%% trial
-
-trial.F = full(f_F(zeros(n, 1), marker.shoulder_variables, marker.forearm_variables, marker.hand_variables, zeros(3*m, 1)));
-trial.G = full(f_G(zeros(n, 1), marker.shoulder_variables, marker.forearm_variables, marker.hand_variables, zeros(3*m, 1)));
-trial.H = [full(f_J(zeros(n, 1), marker.shoulder_variables, marker.forearm_variables, marker.hand_variables)); eye(n)];
-trial.J = zeros(3*m+n, 3*m);
-
-%% Full-order state observer
-
-% The pair (F, H) is observable
-state_observer.obs_matrix = obsv(model.kf.F, model.kf.H);
-
-% Pole allocation
-state_observer.eigs = zeros(n, 1);
-
-% Compute L s.t. F+LH has the desired poles
-state_observer.L = place(model.kf.F', -model.kf.H', state_observer.eigs)';
-
-%% Uncomment Kalman Filter function
-
-set_param('master_thesis_simulink/Kalman Filter','commented','on');
+% Equilibrium point
+kf.equilibrium_q = zeros(n, 1);
+kf.equilibrium_u = zeros(3*m, 1);
 
 %% Generate the mex functions
 
 opts = struct('main', true, 'mex', true);
-f_Phi.generate('f_Phi_mex.c', opts);
-mex f_Phi_mex.c
-f_J.generate('f_J_mex.c', opts);
-mex f_J_mex.c
-f_Jpseudo.generate('f_Jpseudo_mex.c', opts);
-mex f_Jpseudo_mex.c
-f_RungeKutta.generate('f_RungeKutta_mex.c', opts);
-mex f_RungeKutta_mex.c
+functions.f_Jpseudo.generate('f_Jpseudo_mex.c', opts);
+mex f_Jpseudo_mex.c;
+functions.f_f.generate('f_f_mex.c', opts);
+mex f_f_mex.c;
+functions.f_Phi.generate('f_Phi_mex.c', opts);
+mex f_Phi_mex.c;
+
+%% Simulink structure
+% 
+% simulink.n = n;
+% simulink.m = m;
+% simulink.sample_Time = sample_Time;
 
 %% Functions declaration
 
