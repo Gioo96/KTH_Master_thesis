@@ -15,6 +15,9 @@ simulink.time = 4.5;
 % Simulation IC [rad]
 simulink.q0 = zeros(n, 1);
 
+% NLDM IC
+set_param('master_thesis_simulink/NLDM delay', 'InitialCondition', 'simulink.q0');
+
 % Marker is placed in the : shoulder --> 1
 %                           forearm  --> 2
 %                           hand     --> 3
@@ -46,13 +49,16 @@ noise.measurement_seed = 1;
 noise.input_var = 0.0000001 * ones(m*3, 1);
 noise.input_seed = 2;
 
-% Uncomment Kalman Filter function
+% Comment Kalman Filter function
 set_param('master_thesis_simulink/Kalman Filter','commented','on');
 
-% Uncomment Linearized Discrete model
-set_param('master_thesis_simulink/Linearized Discrete model','commented','on');
+% Comment Extended Kalman Filter function
+set_param('master_thesis_simulink/Extended Kalman Filter','commented','on');
 
-% Uncomment State-Observer
+% Comment Linearized Discrete model
+set_param('master_thesis_simulink/Linearized Discrete Model','commented','on');
+
+% Comment State-Observer
 set_param('master_thesis_simulink/State-observer','commented','on');
 
 %% FORWARD KINEMATICS
@@ -170,8 +176,8 @@ model.linearized.F_symb = jacobian(model.f, model.q);
 model.linearized.G_symb = jacobian(model.f, rk.u);
 
 % Function F, G
-functions.f_F = Function('f_F', {model.q, model.arm_parameters.shou_vars, model.arm_parameters.fore_vars, model.arm_parameters.hand_vars, rk.u}, {model.linearized.F_symb});
-functions.f_G = Function('f_G', {model.q, model.arm_parameters.shou_vars, model.arm_parameters.fore_vars, model.arm_parameters.hand_vars, rk.u}, {model.linearized.G_symb});
+functions.f_Fekf = Function('f_Fekf', {model.q, model.arm_parameters.shou_vars, model.arm_parameters.fore_vars, model.arm_parameters.hand_vars, rk.u}, {model.linearized.F_symb});
+functions.f_Gekf = Function('f_Gekf', {model.q, model.arm_parameters.shou_vars, model.arm_parameters.fore_vars, model.arm_parameters.hand_vars, rk.u}, {model.linearized.G_symb});
 
 % Equilibrium point
 kf.equilibrium_q = zeros(n, 1);
@@ -179,19 +185,31 @@ kf.equilibrium_u = zeros(3*m, 1);
 
 %% Generate the mex functions
 
-opts = struct('main', true, 'mex', true);
-functions.f_Jpseudo.generate('f_Jpseudo_mex.c', opts);
-mex f_Jpseudo_mex.c;
-functions.f_f.generate('f_f_mex.c', opts);
-mex f_f_mex.c;
-functions.f_Phi.generate('f_Phi_mex.c', opts);
-mex f_Phi_mex.c;
-
-%% Simulink structure
+% opts = struct('main', true, 'mex', true);
 % 
-% simulink.n = n;
-% simulink.m = m;
-% simulink.sample_Time = sample_Time;
+% % Generate Jpseudo
+% functions.f_Jpseudo.generate('f_Jpseudo_mex.c', opts);
+% mex f_Jpseudo_mex.c;
+% 
+% % Generate f
+% functions.f_f.generate('f_f_mex.c', opts);
+% mex f_f_mex.c;
+% 
+% % Generate Phi
+% functions.f_Phi.generate('f_Phi_mex.c', opts);
+% mex f_Phi_mex.c;
+% 
+% % Generate F
+% functions.f_Fekf.generate('f_Fekf_mex.c', opts);
+% mex f_Fekf_mex.c;
+% 
+% % Generate G
+% functions.f_G.generate('f_G_mex.c', opts);
+% mex f_G_mex.c;
+% 
+% % Generate H
+% functions.f_J.generate('f_H_mex.c', opts);
+% mex f_H_mex.c;
 
 %% Functions declaration
 
