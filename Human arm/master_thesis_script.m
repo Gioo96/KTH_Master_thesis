@@ -50,16 +50,26 @@ noise.input_var = 0.0000001 * ones(m*3, 1);
 noise.input_seed = 2;
 
 % Comment Kalman Filter function
-set_param('master_thesis_simulink/Kalman Filter','commented','on');
+set_param('master_thesis_simulink/Kalman Filter', 'commented', 'on');
 
 % Comment Extended Kalman Filter function
-set_param('master_thesis_simulink/Extended Kalman Filter','commented','on');
+set_param('master_thesis_simulink/Extended Kalman Filter', 'commented', 'on');
 
 % Comment Linearized Discrete model
-set_param('master_thesis_simulink/Linearized Discrete Model','commented','on');
+set_param('master_thesis_simulink/Linearized Discrete Model', 'commented', 'on');
 
 % Comment State-Observer
-set_param('master_thesis_simulink/State-observer','commented','on');
+set_param('master_thesis_simulink/State-observer', 'commented', 'on');
+
+% Comment joints' trajectory
+% q1
+set_param('master_thesis_simulink/Human arm/RightShoulder_joint/jRightShoulder_rotx', 'TorqueActuationMode', 'NoTorque', 'MotionActuationMode', 'ComputedMotion');
+
+% q2
+set_param('master_thesis_simulink/Human arm/RightShoulder_joint/jRightShoulder_roty', 'TorqueActuationMode', 'NoTorque', 'MotionActuationMode', 'ComputedMotion');
+
+% q3
+set_param('master_thesis_simulink/Human arm/RightShoulder_joint/jRightShoulder_rotz', 'TorqueActuationMode', 'NoTorque', 'MotionActuationMode', 'ComputedMotion');
 
 % Comment joints' trajectory
 % q1
@@ -195,8 +205,8 @@ kf.equilibrium_u = zeros(3*m, 1);
 
 %% Generate the mex functions
 
-% opts = struct('main', true, 'mex', true);
-% 
+opts = struct('main', true, 'mex', true);
+
 % % Generate Jpseudo
 % functions.f_Jpseudo.generate('f_Jpseudo_mex.c', opts);
 % mex f_Jpseudo_mex.c;
@@ -212,14 +222,14 @@ kf.equilibrium_u = zeros(3*m, 1);
 % % Generate F
 % functions.f_Fekf.generate('f_Fekf_mex.c', opts);
 % mex f_Fekf_mex.c;
-% 
-% % Generate G
-% functions.f_G.generate('f_G_mex.c', opts);
-% mex f_G_mex.c;
+
+% Generate G
+% functions.f_Gekf.generate('f_Gekf_mex.c', opts);
+% mex f_Gekf_mex.c;
 % 
 % % Generate H
-% functions.f_J.generate('f_H_mex.c', opts);
-% mex f_H_mex.c;
+% functions.f_J.generate('f_Hekf_mex.c', opts);
+% mex f_Hekf_mex.c;
 
 %% Functions declaration
 
