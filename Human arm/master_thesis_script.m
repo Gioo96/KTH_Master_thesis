@@ -61,6 +61,16 @@ set_param('master_thesis_simulink/Linearized Discrete Model','commented','on');
 % Comment State-Observer
 set_param('master_thesis_simulink/State-observer','commented','on');
 
+% Comment joints' trajectory
+% q1
+set_param('master_thesis_simulink/Human arm/RightShoulder_joint/q1_traj','commented','on');
+
+% q2
+set_param('master_thesis_simulink/Human arm/RightShoulder_joint/q2_traj','commented','on');
+
+% q3
+set_param('master_thesis_simulink/Human arm/RightShoulder_joint/q3_traj','commented','on');
+
 %% FORWARD KINEMATICS
 
 % Name the markers which are placed in the shoulder, forearm and hand
