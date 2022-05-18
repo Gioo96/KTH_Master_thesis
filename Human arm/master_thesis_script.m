@@ -46,8 +46,10 @@ m = size(marker.links, 1);
 % Noise (TO BE ESTIMATED)
 noise.measurement_var = 0.00001 * ones(m*3, 1);
 noise.measurement_seed = 1;
+noise.process_var = 0.00001 * diag(ones(n, 1));
+noise.process_seed = 2;
 noise.input_var = 0.0000001 * ones(m*3, 1);
-noise.input_seed = 2;
+noise.input_seed = 3;
 
 % Comment Kalman Filter function
 set_param('master_thesis_simulink/Kalman Filter', 'commented', 'on');
