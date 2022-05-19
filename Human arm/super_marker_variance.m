@@ -1,4 +1,4 @@
-function sample_variance = super_marker_variance(out, sample_mean, delay)
+function sample_variance = super_marker_variance(struct, sample_mean, delay)
 
 % super_marker_var computes the sample variance given a set of measurements
 
@@ -11,13 +11,13 @@ function sample_variance = super_marker_variance(out, sample_mean, delay)
 % -- sample_variance   : Sample variance
 
 % Number of samples
-n = length(out.super_marker_1.time) - delay;
+n = length(struct.time) - delay;
 
 % Sample variance computation --> Unbiased estimate
 sum = zeros(3, 3);
-for i = delay+1 : length(out.super_marker_1.time)
+for i = delay+1 : length(struct.time)
 
-    sum = sum + (out.super_marker_1.signals.values(i, :)' - sample_mean) * (out.super_marker_1.signals.values(i, :)' - sample_mean)';
+    sum = sum + (struct.signals.values(i, :)' - sample_mean) * (struct.signals.values(i, :)' - sample_mean)';
 end
 sample_variance = sum / (n - 1);
 

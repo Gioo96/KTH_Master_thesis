@@ -16,7 +16,7 @@ simulink.time = 4.5;
 simulink.q0 = zeros(n, 1);
 
 % NLDM IC
-set_param('master_thesis_simulink/System/NLDM delay', 'InitialCondition', 'simulink.q0');
+set_param('master_thesis_simulink/NLDM delay', 'InitialCondition', 'simulink.q0');
 
 % Marker is placed in the : shoulder --> 1
 %                           forearm  --> 2
@@ -43,32 +43,32 @@ marker.hand_variables = [0 -3/4*arm.hand.dimensions(2) arm.hand.dimensions(3)/2+
 % Number of markers
 m = size(marker.links, 1);
 
-% % Comment System
-% set_param('master_thesis_simulink/System', 'commented', 'on');
-% 
-% % Noise (TO BE ESTIMATED)
-% % Simulation of 10s
-% simulink.time = 10;
-% 
-% % MARKER M1 POSITION
-% 
-% % Simulation
-% output_est = sim("master_thesis_simulink.slx");
-% % Sample mean
-% [marker.m1.pos.sample_mean, marker.m1.pos.delay] = super_marker_mean(output_est.super_m1_pos);
-% % Sample variance
-% marker.m1.pos.sample_variance = super_marker_variance(output_est.super_m1_pos, marker.m1.pos.sample_mean, marker.m1.pos.delay);
-% 
-% % MARKER M1 VELOCITY
-% 
-% global meas;
-% global pp;
-% sub = rossubscriber("/qualisys/Super_marker_1/odom", @Callback, 'DataFormat', 'struct');
-% % % Sample mean
-% % [marker.m1.pos.sample_mean, marker.m1.pos.delay] = super_marker_mean(output_est);
-% % % Sample variance
-% % marker.m1.pos.sample_variance = super_marker_variance(output_est, marker.m1.pos.sample_mean, marker.m1.pos.delay);
+% Comment System
+set_param('master_thesis_simulink/System', 'commented', 'on');
 
+% Noise (TO BE ESTIMATED)
+% Simulation of 10s
+simulink.time = 10;
+
+% MARKER M1 POSITION
+
+% Simulation
+output_est = sim("master_thesis_simulink.slx");
+% Sample mean
+[marker.m1.pos.sample_mean, marker.m1.pos.delay] = super_marker_mean(output_est);
+% Sample variance
+marker.m1.pos.sample_variance = super_marker_variance(output_est, marker.m1.pos.sample_mean, marker.m1.pos.delay);
+
+% MARKER M1 VELOCITY
+
+global meas;
+global pp;
+%getMeasurements("/qualisys/Super_marker_1/odom", @Callback);
+sub = rossubscriber("/qualisys/Super_marker_1/odom", @Callback, 'DataFormat', 'struct');
+% Sample mean
+[marker.m1.pos.sample_mean, marker.m1.pos.delay] = super_marker_mean(output_est);
+% Sample variance
+marker.m1.pos.sample_variance = super_marker_variance(output_est, marker.m1.pos.sample_mean, marker.m1.pos.delay);
 noise.measurement_var = 0.00001 * ones(m*3, 1);
 noise.measurement_seed = 1;
 noise.process_var = 0.00001 * diag(ones(n, 1));
@@ -80,33 +80,33 @@ noise.input_seed = 3;
 simulink.time = 4.5;
 
 % Comment Kalman Filter function
-set_param('master_thesis_simulink/System/Kalman Filter', 'commented', 'on');
+set_param('master_thesis_simulink/Kalman Filter', 'commented', 'on');
 
 % Comment Extended Kalman Filter function
-set_param('master_thesis_simulink/System/Extended Kalman Filter', 'commented', 'on');
+set_param('master_thesis_simulink/Extended Kalman Filter', 'commented', 'on');
 
 % Comment Linearized Discrete model
-set_param('master_thesis_simulink/System/Linearized Discrete Model', 'commented', 'on');
+set_param('master_thesis_simulink/Linearized Discrete Model', 'commented', 'on');
 
 % Comment State-Observer
-set_param('master_thesis_simulink/System/State-observer', 'commented', 'on');
+set_param('master_thesis_simulink/State-observer', 'commented', 'on');
 
 % Joints' trajectory
 % q1
 %set_param('master_thesis_simulink/Human arm/RightShoulder_joint/jRightShoulder_rotx', 'TorqueActuationMode', 'NoTorque', 'MotionActuationMode', 'ComputedMotion');
-set_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/jRightShoulder_rotx', 'TorqueActuationMode', 'ComputedTorque', 'MotionActuationMode', 'InputMotion');
+set_param('master_thesis_simulink/Human arm/RightShoulder_joint/jRightShoulder_rotx', 'TorqueActuationMode', 'ComputedTorque', 'MotionActuationMode', 'InputMotion');
 
 % q2
 %set_param('master_thesis_simulink/Human arm/RightShoulder_joint/jRightShoulder_roty', 'TorqueActuationMode', 'NoTorque', 'MotionActuationMode', 'ComputedMotion');
-set_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/jRightShoulder_roty', 'TorqueActuationMode', 'ComputedTorque', 'MotionActuationMode', 'InputMotion');
+set_param('master_thesis_simulink/Human arm/RightShoulder_joint/jRightShoulder_roty', 'TorqueActuationMode', 'ComputedTorque', 'MotionActuationMode', 'InputMotion');
 
 % q3
 %set_param('master_thesis_simulink/Human arm/RightShoulder_joint/jRightShoulder_rotz', 'TorqueActuationMode', 'NoTorque', 'MotionActuationMode', 'ComputedMotion');
-set_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/jRightShoulder_rotz', 'TorqueActuationMode', 'ComputedTorque', 'MotionActuationMode', 'InputMotion');
+set_param('master_thesis_simulink/Human arm/RightShoulder_joint/jRightShoulder_rotz', 'TorqueActuationMode', 'ComputedTorque', 'MotionActuationMode', 'InputMotion');
 
 % q4
 %set_param('master_thesis_simulink/Human arm/Elbow_joint/jRightElbow_rotx', 'TorqueActuationMode', 'NoTorque', 'MotionActuationMode', 'ComputedMotion');
-set_param('master_thesis_simulink/System/Human arm/Elbow_joint/jRightElbow_rotx', 'TorqueActuationMode', 'ComputedTorque', 'MotionActuationMode', 'InputMotion');
+set_param('master_thesis_simulink/Human arm/Elbow_joint/jRightElbow_rotx', 'TorqueActuationMode', 'ComputedTorque', 'MotionActuationMode', 'InputMotion');
 
 %% FORWARD KINEMATICS
 
