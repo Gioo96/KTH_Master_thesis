@@ -12,6 +12,8 @@ simulink.time = 10;
 
 % MARKER M1 POSITION
 
+global marker;
+
 % Uncomment Pose block
 set_param('master_thesis_simulink/Ros2Matlab/Pose', 'commented', 'off');
 % Comment Twist block
@@ -29,10 +31,9 @@ marker.m1.pos.sample_variance = super_marker_variance(m1_pos.super_m1_pos, marke
 set_param('master_thesis_simulink/Ros2Matlab/Twist', 'commented', 'off');
 % Comment Pose block
 set_param('master_thesis_simulink/Ros2Matlab/Pose', 'commented', 'on');
-global meas;
+% global meas;
+% global m1_vel;
+
 global m1_vel;
-sub = rossubscriber("/qualisys/Super_marker_1/odom", @Callback, 'DataFormat', 'struct');
-% % Sample mean
-% [marker.m1.pos.sample_mean, marker.m1.pos.delay] = super_marker_mean(output_est);
-% % Sample variance
-% marker.m1.pos.sample_variance = super_marker_variance(output_est, marker.m1.pos.sample_mean, marker.m1.pos.delay);
+sub = rossubscriber("/qualisys/Super_marker_1/odom", @Callback_velocity, 'DataFormat', 'struct');   
+
