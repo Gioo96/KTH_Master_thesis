@@ -8,15 +8,12 @@ global count;
 global meas_pos;
 global meas_vel;
 
-% Current time of simulation
+% Current time 
 global current_time;
-
-% Determines when exp starts
+% flag = true if simulation is done
 global flag;
-
 % Simulation output
 global est;
-
 % Saving marker sample mean, sample variance
 global marker;
 global covariance_pos;
