@@ -1,6 +1,6 @@
-function Phi_hand = hand_Phi(marker, q)
+function [Phi_fore, forearm_variable] = FK_forearm(marker_variable, q)
 
-% hand_Phi computes the position of the marker (placed in the HAND) expressed wrt Wrold RF
+% forearm_Phi computes the position of the marker (placed in the FOREARM) expressed wrt Wrold RF
 
 % Human arm parameters
 run('human_arm_param');
@@ -8,7 +8,8 @@ run('human_arm_param');
 % CasADi
 import casadi.*
 
-% marker:      Position of marker placed in the HAND wrt its base RF
+% Position of marker placed in the FOREARM wrt its base RF
+forearm_variable = SX.sym(marker_variable, [3, 1]);
 
 %
 % SHOULDER
@@ -46,36 +47,11 @@ RFS_x = align.Rz * align.Rx * Rx_el; % F_shoulder --> elbow.Rx
 Rx_z = (align.Rz * align.Rx)'; % elbow.Rx --> elbow.Rz
 RFS_BE = RFS_x * Rx_z; % F_shoulder --> B_elbow
 
-%
-% WRIST
-%
-Rx_wr = [cos(q(5)) -sin(q(5)) 0;
-            sin(q(5)) cos(q(5)) 0;
-            0 0 1];
-Ry_wr = [cos(q(6)) -sin(q(6)) 0;
-            sin(q(6)) cos(q(6)) 0;
-            0 0 1];
-Rz_wr = [cos(q(7)) -sin(q(7)) 0;
-            sin(q(7)) cos(q(7)) 0;
-            0 0 1];
-
-% TRANSLATION: F_elbow wrt B_elbow
-trans_BE_FE = [0; -arm.forearm.length; 0];
-% ROTATION+TRANSLATION: F_elbow to F_shoulder
-TFS_FE = [RFS_BE RFS_BE * trans_BE_FE;0 0 0 1];
-% ROTATION+TRANSLATION: F_elbow to W
-TW_FE = TW_FS * TFS_FE;
-% ROTATION: F_elbow --> B_wrist
-RFE_x = align.Rz * align.Rx * Rx_wr; % F_elbow --> wrist.Rx
-Rx_y = align.Ry * align.Rz * Ry_wr; % wrist.Rx --> wrist.Ry
-Ry_BW = align.Rx * align.Ry * Rz_wr; % wrist.Ry --> B_wrist
-RFE_BW = RFE_x * Rx_y * Ry_BW; % F_elbow --> B_wrist
-
-% TRANSLATION: Marker wrt B_wrist
-trans_BW_M = marker;
-% ROTATION+TRANSLATION: Marker to F_elbow
-TFE_M = [RFE_BW RFE_BW * trans_BW_M;0 0 0 1];
+% TRANSLATION: Marker wrt B_elbow
+trans_BE_M = forearm_variable;
+% ROTATION+TRANSLATION: Marker to F_shoulder
+TFS_M = [RFS_BE RFS_BE * trans_BE_M;0 0 0 1];
 % ROTATION+TRANSLATION: Marker to World
-Phi_hand = TW_FE * TFE_M;
+Phi_fore = TW_FS * TFS_M;
 
 end

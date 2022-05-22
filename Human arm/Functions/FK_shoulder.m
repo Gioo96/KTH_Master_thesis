@@ -1,4 +1,4 @@
-function Phi_shou = shoulder_Phi(marker, q)
+function [Phi_shou, shoulder_variable] = FK_shoulder(marker_variable, q)
 
 % shoulder_Phi computes the position of the marker (placed in the SHOULDER) expressed wrt Wrold RF
 
@@ -8,7 +8,8 @@ run('human_arm_param');
 % CasADi
 import casadi.*
 
-% marker:      Position of marker placed in the SHOULDER wrt its base RF
+% Position of marker placed in the SHOULDER wrt its base RF
+shoulder_variable = SX.sym(marker_variable, [3, 1]);
 
 %
 % SHOULDER
@@ -31,7 +32,7 @@ Ry_BS = align.Rx * align.Ry * Rz_sh; % shoulder.Ry --> B_shoulder
 RW_BS = RW_x * Rx_y * Ry_BS; % W --> B_shoulder
 
 % TRANSLATION: Marker wrt B_shoulder
-trans_BS_M = marker;
+trans_BS_M = shoulder_variable;
 % ROTATION+TRANSLATION: Marker to World
 Phi_shou = [RW_BS RW_BS * trans_BS_M;0 0 0 1];
 
