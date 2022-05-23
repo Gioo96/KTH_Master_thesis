@@ -17,16 +17,20 @@ global start;
 % Simulation output
 global noise_estimation;
 
-global old_estimate_pos;
-global old_estimate_vel;
+% Saving marker sample mean, sample variance
+% global marker;
 
 % Covariance of the marker position noise
 global covariance_pos_current;
 
+% Matrix containing all Covariances of the marker position noise
+global covariance_pos_all;
 
 % Covariance of the marker velocity noise
 global covariance_vel_current;
 
+% Matrix containing all Covariances of the marker velocity noise
+global covariance_vel_all;
 
 % Initialization
 if isempty(count)
@@ -34,8 +38,8 @@ if isempty(count)
     current_time = 0;
     count = 0;
     start = false;
-    old_estimate_pos = zeros(3, 3);
-    old_estimate_vel = zeros(3, 3);
+    covariance_pos_all = [];
+    covariance_vel_all = [];
 end
 
 % Extract data from the measurement
@@ -44,10 +48,9 @@ meas_pos = [message.Pose.Pose.Position.X message.Pose.Pose.Position.Y message.Po
 meas_vel = [message.Twist.Twist.Linear.X message.Twist.Twist.Linear.Y message.Twist.Twist.Linear.Z];
 
 % C1 --> Condition satisfied at max once
-if (meas_pos(1) > 0 && count == 0)
+if (meas_pos(1) < 0 && count == 0)
 
     start = true;
-    count = 1;
 end
 
 % Condition always satisfied from condition C1 onward
@@ -56,21 +59,16 @@ if start
     % Position Covariance 
     covariance_pos_matrix = reshape(message.Pose.Covariance, sqrt(length(message.Pose.Covariance)), sqrt(length(message.Pose.Covariance)));
     covariance_pos_current = covariance_pos_matrix(1:3, 1:3);
+    covariance_pos_all = [covariance_pos_all, covariance_pos_current];
 
     % Velocity Covariance
     covariance_vel_matrix = reshape(message.Twist.Covariance, sqrt(length(message.Twist.Covariance)), sqrt(length(message.Twist.Covariance)));
     covariance_vel_current = covariance_vel_matrix(1:3, 1:3);
+    covariance_vel_all = [covariance_vel_all, covariance_pos_current];
 
-    pos = old_estimate_pos + (covariance_pos_current - old_estimate_pos) / count;
-    old_estimate_pos = pos;
-    vel = old_estimate_vel + (covariance_vel_current - old_estimate_vel) / count;
-    old_estimate_vel = vel;
-
-    c = count + 1;
-    count = c;
+    count = count + 1;
     next_time = current_time + 0.01;
     current_time = next_time;
-    disp(current_time);
 end
 
 % Simulation
