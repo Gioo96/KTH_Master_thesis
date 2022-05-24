@@ -1,21 +1,8 @@
 
 
-% Human arm parameters
-run('human_arm_param.m');
 
-% Uncomment System
-set_param('master_thesis_simulink/System', 'commented', 'off');
-
-% Comment Ros2Matlab
-set_param('master_thesis_simulink/Ros2Matlab', 'commented', 'on');
 
 %% Set parameters
-
-% Sampling time
-sample_Time = 0.01;
-
-% Simulation time
-simulink.time = 4.5;
 
 % Marker is placed in the : shoulder --> 1
 %                           forearm  --> 2
@@ -50,20 +37,6 @@ noise.process_seed = 2;
 noise.input_var = 0.0000001 * ones(m*3, 1);
 noise.input_seed = 3;
 
-% NLDM IC
-set_param('master_thesis_simulink/System/NLDM delay', 'InitialCondition', 'simulink.q0');
-
-% Comment Kalman Filter function
-set_param('master_thesis_simulink/System/Kalman Filter', 'commented', 'on');
-
-% Comment Extended Kalman Filter function
-set_param('master_thesis_simulink/System/Extended Kalman Filter', 'commented', 'on');
-
-% Comment Linearized Discrete model
-set_param('master_thesis_simulink/System/Linearized Discrete Model', 'commented', 'on');
-
-% Comment State-Observer
-set_param('master_thesis_simulink/System/State-observer', 'commented', 'on');
 
 % Joints' trajectory
 % q1

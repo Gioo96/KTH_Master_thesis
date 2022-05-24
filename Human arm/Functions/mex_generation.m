@@ -1,6 +1,17 @@
 function mex_generation(links, sample_Time)
 
-% CasADi
+% mex_generation generates the following mex functions: - Phi
+%                                                       - Jpseudo
+%                                                       - f
+%                                                       - F_ekf
+%                                                       - G_ekf
+%                                                       - H_ekf
+
+% Inputs:
+% -- links          : Vector containing indices {1, 2, 3} related to the corresponding marker position
+% -- sample_Time    : Sampling time
+
+%  CasADi
 import casadi.*
 
 %% FORWARD KINEMATICS
@@ -137,8 +148,8 @@ opts = struct('main', true, 'mex', true);
 % mex f_Phi_mex.c;
 % 
 % % Generate Jpseudo
-% f_Jpseudo.generate('f_Jpseudo_mex.c', opts);
-% mex f_Jpseudo_mex.c;
+f_Jpseudo.generate('f_Jpseudo_mex.c', opts);
+mex f_Jpseudo_mex.c;
 % 
 % % Generate f
 % f_f.generate('f_f_mex.c', opts);
