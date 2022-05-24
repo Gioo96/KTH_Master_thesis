@@ -44,7 +44,7 @@ meas_pos = [message.Pose.Pose.Position.X message.Pose.Pose.Position.Y message.Po
 meas_vel = [message.Twist.Twist.Linear.X message.Twist.Twist.Linear.Y message.Twist.Twist.Linear.Z];
 
 % C1 --> Condition satisfied at max once
-if (meas_pos(1) > 0 && count == 0)
+if (meas_pos(1) < 0 && count == 0)
 
     start = true;
     count = 1;
@@ -66,29 +66,26 @@ if start
     vel = old_estimate_vel + (covariance_vel_current - old_estimate_vel) / count;
     old_estimate_vel = vel;
 
-    c = count + 1;
-    count = c;
-    next_time = current_time + 0.01;
-    current_time = next_time;
-    disp(current_time);
+    count = count + 1;
+    current_time = current_time + 0.01;
 end
 
 % Simulation
-if (count == 1) 
-
-    noise_estimation = sim("master_thesis_simulink.slx");
-   
-    %% Position
-    % Sample mean
-    [marker.m1.pos.sample_mean, marker.m1.pos.delay] = super_marker_mean(noise_estimation.super_m1_pos);
-    % Sample variance
-    marker.m1.pos.sample_variance = super_marker_variance(noise_estimation.super_m1_pos, marker.m1.pos.sample_mean, marker.m1.pos.delay);
-
-    %% Velocity
-    % Sample mean
-    [marker.m1.vel.sample_mean, marker.m1.vel.delay] = super_marker_mean(noise_estimation.super_m1_vel);
-    % Sample variance
-    marker.m1.vel.sample_variance = super_marker_variance(noise_estimation.super_m1_vel, marker.m1.vel.sample_mean, marker.m1.vel.delay);
-end
+% if (count == 1) 
+% 
+%     noise_estimation = sim("master_thesis_simulink.slx");
+%    
+%     %% Position
+%     % Sample mean
+%     [marker.m1.pos.sample_mean, marker.m1.pos.delay] = super_marker_mean(noise_estimation.super_m1_pos);
+%     % Sample variance
+%     marker.m1.pos.sample_variance = super_marker_variance(noise_estimation.super_m1_pos, marker.m1.pos.sample_mean, marker.m1.pos.delay);
+% 
+%     %% Velocity
+%     % Sample mean
+%     [marker.m1.vel.sample_mean, marker.m1.vel.delay] = super_marker_mean(noise_estimation.super_m1_vel);
+%     % Sample variance
+%     marker.m1.vel.sample_variance = super_marker_variance(noise_estimation.super_m1_vel, marker.m1.vel.sample_mean, marker.m1.vel.delay);
+% end
 
 end
