@@ -147,12 +147,19 @@ opts = struct('main', true, 'mex', true);
 % f_Phi.generate('f_Phi_mex.c', opts);
 % mex f_Phi_mex.c;
 % 
+% Generate J
+f_J.generate('f_J_mex.c', opts);
+mex f_J_mex.c;
+%
 % % Generate Jpseudo
 % f_Jpseudo.generate('f_Jpseudo_mex.c', opts);
 % mex f_Jpseudo_mex.c;
+<<<<<<< HEAD
 % Generate Jpseudo
 f_J.generate('f_J_mex.c', opts);
 mex f_J_mex.c;
+=======
+>>>>>>> 7bd921c256ee69a625810d4d01884223ebd803fc
 % 
 % % Generate f
 % f_f.generate('f_f_mex.c', opts);

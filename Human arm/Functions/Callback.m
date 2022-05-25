@@ -14,8 +14,8 @@ global current_time;
 % True when exp starts
 global start;
 
-% Simulation output
-global noise_estimation;
+% % Simulation output
+% global noise_estimation;
 
 global old_estimate_pos;
 global old_estimate_vel;
@@ -44,10 +44,9 @@ meas_pos = [message.Pose.Pose.Position.X message.Pose.Pose.Position.Y message.Po
 meas_vel = [message.Twist.Twist.Linear.X message.Twist.Twist.Linear.Y message.Twist.Twist.Linear.Z];
 
 % C1 --> Condition satisfied at max once
-if (meas_pos(1) < 0 && count == 0)
+if (meas_pos(1) > 0 && count == 0)
 
     start = true;
-    count = 1;
 end
 
 % Condition always satisfied from condition C1 onward
@@ -61,10 +60,8 @@ if start
     covariance_vel_matrix = reshape(message.Twist.Covariance, sqrt(length(message.Twist.Covariance)), sqrt(length(message.Twist.Covariance)));
     covariance_vel_current = covariance_vel_matrix(1:3, 1:3);
 
-    pos = old_estimate_pos + (covariance_pos_current - old_estimate_pos) / count;
-    old_estimate_pos = pos;
-    vel = old_estimate_vel + (covariance_vel_current - old_estimate_vel) / count;
-    old_estimate_vel = vel;
+    old_estimate_pos = old_estimate_pos + (covariance_pos_current - old_estimate_pos) / (count + 1);
+    old_estimate_vel = old_estimate_vel + (covariance_vel_current - old_estimate_vel) / (count + 1);
 
     count = count + 1;
     current_time = current_time + 0.01;

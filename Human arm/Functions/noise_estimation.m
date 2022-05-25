@@ -1,8 +1,4 @@
-% Clear variables, figures
-clear;
-clear global;
-close all;
-clc;
+function [Nu_mi, R_mi] = noise_estimation(number_simulations)
 
 % Initialize ROS
 rosinit;
@@ -21,20 +17,19 @@ global meas_vel;
 global current_time;
 global start;
 global count;
-global covariance_pos_current;
-global covariance_vel_current;
 global old_estimate_pos;
 global old_estimate_vel;
 
 vel = rossubscriber("/qualisys/Super_marker_1/odom", @Callback, 'DataFormat', 'struct');
 pause(0.5);
 
+% Offset for the covariances figure
 offset_x = [0.2 0 0 0];
 offset_y = [0 -0.5 0 0];
 
-
+Nu_mi = zeros(3, 3);
+R_mi = zeros(3, 3);
 i = 1;
-
 while i <= number_simulations
 
     % Markers' POSITION
@@ -105,7 +100,6 @@ while i <= number_simulations
     
     % Stop simulation when meas_pos(1) < 0
     n_samples = 0;
-    disp(current_time);
     while ~stop
     
         if (meas_pos(1) < 0)
@@ -125,19 +119,25 @@ while i <= number_simulations
         
         if (n_samples == 0)
 
-            text(0.25, 0.65, sprintf('%d %d %d\n', old_estimate_pos));
-            text(0.25, 0.2, sprintf('%d %d %d\n', old_estimate_vel));
+            t1 = text(0.25, 0.65, sprintf('%d %d %d\n', old_estimate_pos));
+            t2 = text(0.25, 0.2, sprintf('%d %d %d\n', old_estimate_vel));
 
         else
 
-            t1 = text(0.25, 0.65, sprintf('%d %d %d\n', old_estimate_pos));
             delete(t1);
-            t2 = text(0.25, 0.2, sprintf('%d %d %d\n', old_estimate_vel));
+            t1 = text(0.25, 0.65, sprintf('%d %d %d\n', old_estimate_pos));
+           
             delete(t2);
+            t2 = text(0.25, 0.2, sprintf('%d %d %d\n', old_estimate_vel));
+            
         end
     
         n_samples = n_samples + 1;
     end
+
+    % Noise covariances related to the position and velocity of the marker
+    Nu_mi = Nu_mi + (old_estimate_vel - Nu_mi) / i;
+    R_mi = R_mi + (old_estimate_pos - R_mi) / i;
 
     % Initialization
     start = false;
@@ -150,13 +150,6 @@ while i <= number_simulations
 
 end
 
-% Noise
-% noise.R = 0.00001 * diag(ones(m*3, 1));
-% noise.R_seed = 1;
-% noise.Q = 0.00001 * diag(ones(n, 1));
-% noise.Q_seed = 2;
-% noise.Nu = 0.0000001 * diag(ones(m*3, 1));
-% noise.Nu_seed = 3;
-
 % Shutdown ROS
 rosshutdown;
+end
