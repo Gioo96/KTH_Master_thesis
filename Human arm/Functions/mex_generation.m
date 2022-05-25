@@ -105,7 +105,7 @@ f_J = Function('f_J', {q, shou_vars, fore_vars, hand_vars}, {J});
 Jpseudo = pinv(J);
 
 % PseudoInverse function
-f_Jpseudo = Function('f_Jpseudo', {q, shou_vars, fore_vars, hand_vars}, {Jpseudo});
+f_Jpseudo = Function('f_Jpseudoa', {q, shou_vars, fore_vars, hand_vars}, {Jpseudo});
 
 %% Discretization Runge-Kutta
 % qk+1 = qk + 1/6*Ts*(k1 + 2k2 + 2k3 + k4) ---> qk+1 = f(qk, u_noisyk)
@@ -147,19 +147,13 @@ opts = struct('main', true, 'mex', true);
 % f_Phi.generate('f_Phi_mex.c', opts);
 % mex f_Phi_mex.c;
 % 
-% Generate J
-f_J.generate('f_J_mex.c', opts);
-mex f_J_mex.c;
+% % Generate J
+% f_J.generate('f_J_mex.c', opts);
+% mex f_J_mex.c;
 %
-% % Generate Jpseudo
-% f_Jpseudo.generate('f_Jpseudo_mex.c', opts);
-% mex f_Jpseudo_mex.c;
-<<<<<<< HEAD
 % Generate Jpseudo
-f_J.generate('f_J_mex.c', opts);
-mex f_J_mex.c;
-=======
->>>>>>> 7bd921c256ee69a625810d4d01884223ebd803fc
+f_Jpseudo.generate('f_Jpseudoa_mex.c', opts);
+mex f_Jpseudoa_mex.c;
 % 
 % % Generate f
 % f_f.generate('f_f_mex.c', opts);
