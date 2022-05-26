@@ -1,4 +1,4 @@
-function LS_KF_EKF_NLDM(q0, sampling_time, method_flag, simModel_flag, C_code_folder)
+function LS_KF_EKF_NLDM(q0, method_flag, simModel_flag, C_code_folder)
 
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
@@ -27,8 +27,6 @@ set_param('master_thesis_simulink/Ros2Matlab', 'commented', 'on');
 global q0_model;
 global q0_LS;
 global q0_NLDM;
-global sample_Time;
-sample_Time = sampling_time;
 
 % Number of DoF
 n = 7;
