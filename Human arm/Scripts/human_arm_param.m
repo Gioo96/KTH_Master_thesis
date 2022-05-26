@@ -1,10 +1,5 @@
 %% HUMAN ARM PARAMETERS
 
-% clear;
-% clear global;
-% close all;
-% clc;
-
 % Number of DoF
 n = 7;
 
@@ -57,9 +52,6 @@ align.Rz = [0 -1 0;
             1 0 0;
             0 0 1];
 
-%% Sample Time
-sample_Time = 0.01;
-
 %% Simulation time
 simulink.time = 4.5;
 
@@ -73,4 +65,6 @@ noise.Nu_seed = 3;
 
 %% Global variables
 global q0_model;
+global sample_Time;
 global q0_LS;
+global q0_NLDM;
