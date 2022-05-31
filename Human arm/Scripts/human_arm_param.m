@@ -70,3 +70,6 @@ noise.Nu_seed = 3;
 global q0_model;
 global q0_LS;
 global q0_NLDM;
+global q0_LDM;
+global q_eq;
+global u_eq;
