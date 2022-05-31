@@ -1,4 +1,4 @@
-function LS_KF_EKF_NLDM(method_flag, simModel_flag, markers, C_code_folder)
+function LS_KF_EKF_NLDM(method_flag, simModel_flag, markers, N_samples, C_code_folder)
 
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
@@ -14,6 +14,10 @@ function LS_KF_EKF_NLDM(method_flag, simModel_flag, markers, C_code_folder)
 %                        : 'precompiuted' --> precompiuted trajectory is simulated
 % -- markers             : []                   -->  No Markers are needed here
 %                        : [markers variables]  -->  KF
+% -- kf_ekf              : Struct containing Kalman Filter or Extended Kalman Filter parameters such as : -- Initial states estimate 
+%                                                                                                         -- Initial state covariance estimate
+%                        : [markers variables]  -->  KF
+% -- N_samples           : Number of samples
 % -- C_code_folder       : Folder containing the mex functions needed, depending on the location of the markers
 %                          --> 'S1_F1_H1'
 %                          --> 'S4_F3_H2'
@@ -23,14 +27,6 @@ set_param('master_thesis_simulink/System', 'commented', 'off');
 
 % Comment Ros2Matlab
 set_param('master_thesis_simulink/Ros2Matlab', 'commented', 'on');
-
-% Global variables
-global q0_model; % Simulation Model
-global q0_LS; % LS
-global q0_NLDM; % Non Linear Discrete Model
-global q0_LDM; % Linearized Discrete Model
-global q_eq; % Equilibrium Point (joints')
-global u_eq; % Equilibrium point (input)
 
 % Number of DoF
 n = 7;
@@ -44,12 +40,6 @@ set_param('master_thesis_simulink/System/Human arm/Elbow_joint/jRightElbow_rotx'
 set_param('master_thesis_simulink/System/Human arm/Wrist_joint/jRightWrist_rotx', 'PositionTargetValue', 'q0_model(5)');
 set_param('master_thesis_simulink/System/Human arm/Wrist_joint/jRightWrist_roty', 'PositionTargetValue', 'q0_model(6)');
 set_param('master_thesis_simulink/System/Human arm/Wrist_joint/jRightWrist_rotz', 'PositionTargetValue', 'q0_model(7)');
-
-% NLDM IC
-q0_NLDM = q0_model;
-
-% LDM IC
-q0_LDM = q0_model;
 
 %% Add path 'C code/C_code_folder' <-- target_folder
 set_Mex(C_code_folder);
@@ -141,6 +131,13 @@ switch method_flag
 
     case 'KF'
         
+        % Global variables
+        global noise;
+        global kf;
+
+        % Number of markers
+        m = size(markers.shoulder_variables, 1) + size(markers.forearm_variables, 1) + size(markers.hand_variables, 1);
+
         %% Comment blocks and set parameters 
 
         % Uncomment KF vs OBS block
@@ -156,23 +153,66 @@ switch method_flag
         set_param('master_thesis_simulink/System/EKF', 'commented', 'on');
 
         % F matrix --> df/dq evaluated at the equilibrium point
-        F = full(f_Fekf_mex(q_eq, marker.shoulder_variables, marker.forearm_variables, marker.hand_variables, u_eq));
+        kf.F = full(f_Fekf_mex(kf.q_eq, markers.shoulder_variables, markers.forearm_variables, markers.hand_variables, kf.u_eq));
         % G matrix --> df/du evaluated at the equilibrium point
-        G = full(f_Gekf_mex(q_eq, marker.shoulder_variables, marker.forearm_variables, marker.hand_variables, u_eq));
+        kf.G = full(f_Gekf_mex(kf.q_eq, markers.shoulder_variables, markers.forearm_variables, markers.hand_variables, kf.u_eq));
         
         % H matrix --> dPhi/dq (Jacobian J) evaluated at the equilibrium point
-        H = full(f_J_mex(q_eq, marker.shoulder_variables, marker.forearm_variables, marker.hand_variables));
+        kf.H = full(f_J_mex(kf.q_eq, markers.shoulder_variables, markers.forearm_variables, markers.hand_variables));
         % J matrix --> dPhi/du = 0 
-        J = zeros(3*m, 3*m);
+        kf.J = zeros(3*m, 3*m);
 
         % F, G, H, J matrices
-        set_param('master_thesis_simulink/System/KF vs OBS/Discrete State-Space', 'A', 'F');
-        set_param('master_thesis_simulink/System/KF vs OBS/Discrete State-Space', 'B', 'G');
-        set_param('master_thesis_simulink/System/KF vs OBS/Discrete State-Space', 'C', 'H');
-        set_param('master_thesis_simulink/System/KF vs OBS/Discrete State-Space', 'D', 'J');
+        set_param('master_thesis_simulink/System/KF vs OBS/Discrete State-Space', 'A', 'kf.F');
+        set_param('master_thesis_simulink/System/KF vs OBS/Discrete State-Space', 'B', 'kf.G');
+        set_param('master_thesis_simulink/System/KF vs OBS/Discrete State-Space', 'C', 'kf.H');
+        set_param('master_thesis_simulink/System/KF vs OBS/Discrete State-Space', 'D', 'kf.J');
 
         % Initial Condition
-        set_param('master_thesis_simulink/System/KF vs OBS/Discrete State-Space', 'InitialCondition', q0_LDM - q_eq);
+        set_param('master_thesis_simulink/System/KF vs OBS/Discrete State-Space', 'InitialCondition', 'q0_model - kf.q_eq');
+
+        %% Compute Pk, Pk_, Kk offline
+
+        % List of Pk for k = 1, .., N
+        kf.Pk = [kf.P0];
+        % List of Pk_ for k = 1, .., N
+        kf.Pk_ = [];
+        % List of Kk for k = 1, .., N
+        kf.Kk = [];
+        
+        % Covariance of nk
+        Q = kf.G * noise.Nu * kf.G';
+
+        % Compute Pk, Pk_, Kk offline
+        for k = 1 : N_samples
+        
+            Pk_ = kf.F * kf.Pk(1:n, n*(k-1)+1:n*(k-1)+n) * kf.F' + Q;
+            Kk = Pk_ * kf.H' / (kf.H * Pk_ * kf.H' + noise.R);
+            Pk = (eye(n) - Kk * kf.H) * Pk_ * (eye(size(kf.F, 1)) - Kk * kf.H)' + Kk * noise.R * Kk';
+            kf.Pk_ = [kf.Pk_, Pk_];
+            kf.Kk = [kf.Kk, Kk];
+            kf.Pk = [kf.Pk, Pk];
+        
+        end
+
+        % Simulation
+        output = sim("master_thesis_simulink.slx");
+        
+        % Plot KF estimate vs CONTINUOS joints' variables
+        fig = figure;
+        sgtitle("Linearized KF vs True");
+        
+        for i = 1 : n
+        
+            q = strcat('$q_', num2str(i), '$');
+            qkf = strcat('$\hat{q}^{KF}_', num2str(i), '$');
+            set(fig, 'position', [10, 10, 1300, 900]);
+            subplot(3,3,i);
+            plot(output.q.time, rad2deg(output.q.signals.values(:, i)), 'LineWidth', 2);
+            hold on;
+            stairs(output.qk_kf.time, rad2deg(squeeze(output.qk_kf.signals.values(i, :))'), 'LineWidth', 2);
+            legend(q, qkf, 'Location', 'southeast', 'Interpreter', 'latex');
+        end
 
     % NLDM
     case 'NLDM'

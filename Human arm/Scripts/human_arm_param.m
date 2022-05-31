@@ -59,6 +59,7 @@ sample_Time = 0.01;
 simulink.time = 4.5;
 
 %% Noise (ESTIMATED) --> ASSUMPTION: All markers have the same noise
+global noise;
 noise.R = 7.9099e-07 * diag(ones(m*3, 1));
 noise.R_seed = 1;
 % noise.Q = 0.00001 * diag(ones(n, 1));
@@ -69,7 +70,4 @@ noise.Nu_seed = 3;
 %% Global variables
 global q0_model;
 global q0_LS;
-global q0_NLDM;
-global q0_LDM;
-global q_eq;
-global u_eq;
+global kf;
