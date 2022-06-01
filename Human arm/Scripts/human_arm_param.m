@@ -62,8 +62,8 @@ simulink.time = 4.5;
 global noise;
 noise.R = 7.9099e-07 * diag(ones(m*3, 1));
 noise.R_seed = 1;
-% noise.Q = 0.00001 * diag(ones(n, 1));
-% noise.Q_seed = 2;
+noise.Q = 0.0000000001 * diag(ones(n, 1));
+noise.Q_seed = 2;
 noise.Nu = 0.0285 * diag(ones(m*3, 1));
 noise.Nu_seed = 3;
 

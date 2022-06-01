@@ -152,6 +152,9 @@ switch method_flag
         % Comment EKF block
         set_param('master_thesis_simulink/System/EKF', 'commented', 'on');
 
+        % State space model : Deltaqk+1 = F*Deltaqk + G*Deltauk_noisy + wk
+        %                     Deltapk   = H*Deltaqk + vk
+
         % F matrix --> df/dq evaluated at the equilibrium point
         kf.F = full(f_Fekf_mex(kf.q_eq, markers.shoulder_variables, markers.forearm_variables, markers.hand_variables, kf.u_eq));
         % G matrix --> df/du evaluated at the equilibrium point
@@ -171,6 +174,17 @@ switch method_flag
         % Initial Condition
         set_param('master_thesis_simulink/System/KF vs OBS/Discrete State-Space', 'InitialCondition', 'q0_model - kf.q_eq');
 
+        % In Simulink the process noise is applied as input so that:
+        % Deltaqk+1 = F*Deltaqk + G*Deltauk_noisy + G*nk -----> wk = G*nk
+        % Deltapk   = H*Deltaqk + vk
+        % var{wk} = Q = G*var{nk}*G'
+        % sqrt(Q)*sqrt(Q) = G*N*G'= G*B*B'*G'
+        % G*B = sqrt(Q)
+        % N = var{vk} = B*B'
+
+        noise.N = linsolve(kf.G, sqrt(noise.Q)) * linsolve(kf.G, sqrt(noise.Q))';
+        noise.N_seed = 4;
+
         %% Compute Pk, Pk_, Kk offline
 
         % List of Pk for k = 1, .., N
@@ -179,14 +193,11 @@ switch method_flag
         kf.Pk_ = [];
         % List of Kk for k = 1, .., N
         kf.Kk = [];
-        
-        % Covariance of nk
-        Q = kf.G * noise.Nu * kf.G';
 
         % Compute Pk, Pk_, Kk offline
         for k = 1 : N_samples
         
-            Pk_ = kf.F * kf.Pk(1:n, n*(k-1)+1:n*(k-1)+n) * kf.F' + Q;
+            Pk_ = kf.F * kf.Pk(1:n, n*(k-1)+1:n*(k-1)+n) * kf.F' + noise.Q;
             Kk = Pk_ * kf.H' / (kf.H * Pk_ * kf.H' + noise.R);
             Pk = (eye(n) - Kk * kf.H) * Pk_ * (eye(size(kf.F, 1)) - Kk * kf.H)' + Kk * noise.R * Kk';
             kf.Pk_ = [kf.Pk_, Pk_];
