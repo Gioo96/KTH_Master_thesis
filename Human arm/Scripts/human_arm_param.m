@@ -58,6 +58,9 @@ sample_Time = 0.01;
 %% Simulation time
 simulink.time = 4.5;
 
+%% Number of samples
+number_samples = simulink.time/sample_Time;
+
 %% Noise (ESTIMATED) --> ASSUMPTION: All markers have the same noise
 global noise;
 noise.R = 7.9099e-07 * diag(ones(m*3, 1));
@@ -71,3 +74,4 @@ noise.Nu_seed = 3;
 global q0_model;
 global q0_LS;
 global kf;
+global ekf;
