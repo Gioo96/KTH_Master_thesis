@@ -99,13 +99,24 @@ J = jacobian(Phi, q);
 % Jacobian function
 f_J = Function('f_J', {q, shou_vars, fore_vars, hand_vars}, {J});
 
+for i = 1 : 10000
+
+    hh1 = 5*randn(3, 2);
+    %ff1 = 8*randn(3, 1);
+    qq = 3*randn(7, 1);
+    JJ = full(f_J(qq, [], [], hh1));
+    if (rank(JJ) ~= 5)
+     disp(JJ);
+    end
+end
+
 %% JACOBIAN PSEUDOINVERSE
 
 % PseudoInverse computation
-Jpseudo = pinv(J);
+Jpseudo = 1/(J'*J) * J';
 
 % PseudoInverse function
-f_Jpseudo = Function('f_Jpseudoa', {q, shou_vars, fore_vars, hand_vars}, {Jpseudo});
+f_Jpseudo = Function('f_Jpseudo', {q, shou_vars, fore_vars, hand_vars}, {Jpseudo});
 
 %% Discretization Runge-Kutta
 % qk+1 = qk + 1/6*Ts*(k1 + 2k2 + 2k3 + k4) ---> qk+1 = f(qk, u_noisyk)
@@ -141,8 +152,8 @@ f_G = Function('f_G', {q, shou_vars, fore_vars, hand_vars, u_noisy}, {G});
 
 %% Generate the mex functions
 
-opts = struct('main', true, 'mex', true);
-
+% opts = struct('main', true, 'mex', true);
+% 
 % % Generate Phi
 % f_Phi.generate('f_Phi_mex.c', opts);
 % mex f_Phi_mex.c;
@@ -150,10 +161,10 @@ opts = struct('main', true, 'mex', true);
 % % Generate J
 % f_J.generate('f_J_mex.c', opts);
 % mex f_J_mex.c;
-%
-% Generate Jpseudo
-f_Jpseudo.generate('f_Jpseudoa_mex.c', opts);
-mex f_Jpseudoa_mex.c;
+% 
+% % Generate Jpseudo
+% f_Jpseudo.generate('f_Jpseudo_mex.c', opts);
+% mex f_Jpseudo_mex.c;
 % 
 % % Generate f
 % f_f.generate('f_f_mex.c', opts);
