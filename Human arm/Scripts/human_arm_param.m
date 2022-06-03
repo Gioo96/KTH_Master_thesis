@@ -60,13 +60,15 @@ arm.markers.radius = 0.01; % [m]
 marker.shoulder_variables = [arm.shoulder.radius+arm.markers.radius -1/4*arm.shoulder.length 0]';
 
 % Forearm
-marker.forearm_variables = [-arm.forearm.radius-arm.markers.radius -1/2*arm.forearm.length 0]';
+marker.forearm_variables = -1;
 
 % Hand
-marker.hand_variables = [-3/7*arm.hand.dimensions(1) -1/4*arm.hand.dimensions(2) -arm.hand.dimensions(3)/2+arm.markers.radius]';
+marker.hand_variables = [-3/7*arm.hand.dimensions(1) -1/4*arm.hand.dimensions(2) +arm.hand.dimensions(3)/2+arm.markers.radius;
+                         0 -3/4*arm.hand.dimensions(2) arm.hand.dimensions(3)/2+arm.markers.radius;
+                         3/7*arm.hand.dimensions(1) -1/2*arm.hand.dimensions(2) -arm.hand.dimensions(3)/2-arm.markers.radius;]';
 
 % Number of markers
-m = size(marker.shoulder_variables, 2) + size(marker.forearm_variables, 2) + size(marker.hand_variables, 2);
+m = size(marker.shoulder_variables, 2) + size(marker.hand_variables, 2);
 
 %% Align Reference frames
 align.Rx = [1 0 0;
@@ -102,3 +104,5 @@ global q0_model;
 global q0_LS;
 global kf;
 global ekf;
+q0_model = pi/20*ones(n, 1);
+q0_LS = pi/20*ones(n, 1);
