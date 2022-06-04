@@ -41,6 +41,7 @@ arm.hand.moment_inertia = [0.0015629, 0.0007401900000000001, 0.0021389]; % [Kg*m
 %% Markers
 arm.markers.radius = 0.01; % [m]
 
+%% S4_F3_H2
 % % Shoulder
 % marker.shoulder_variables = [arm.shoulder.radius+arm.markers.radius -3/4*arm.shoulder.length 0;
 %                    -arm.shoulder.radius-arm.markers.radius -3/4*arm.shoulder.length 0;
@@ -56,6 +57,7 @@ arm.markers.radius = 0.01; % [m]
 % marker.hand_variables = [0 -3/4*arm.hand.dimensions(2) arm.hand.dimensions(3)/2+arm.markers.radius;
 %                    0 -1/4*arm.hand.dimensions(2) arm.hand.dimensions(3)/2+arm.markers.radius]';
 
+%% S1_F0_H3
 % Shoulder
 marker.shoulder_variables = [arm.shoulder.radius+arm.markers.radius -1/4*arm.shoulder.length 0]';
 
@@ -66,6 +68,17 @@ marker.forearm_variables = -1;
 marker.hand_variables = [-3/7*arm.hand.dimensions(1) -1/4*arm.hand.dimensions(2) +arm.hand.dimensions(3)/2+arm.markers.radius;
                          0 -3/4*arm.hand.dimensions(2) arm.hand.dimensions(3)/2+arm.markers.radius;
                          3/7*arm.hand.dimensions(1) -1/2*arm.hand.dimensions(2) -arm.hand.dimensions(3)/2-arm.markers.radius;]';
+
+%% S1_F0_H2
+% Shoulder
+% marker.shoulder_variables = [arm.shoulder.radius+arm.markers.radius -1/4*arm.shoulder.length 0]';
+% 
+% % Forearm
+% marker.forearm_variables = -1;
+% 
+% % Hand
+% marker.hand_variables = [-3/7*arm.hand.dimensions(1) -1/4*arm.hand.dimensions(2) +arm.hand.dimensions(3)/2+arm.markers.radius;
+%                          0 -3/4*arm.hand.dimensions(2) -arm.hand.dimensions(3)/2-arm.markers.radius]';
 
 % Number of markers
 m = size(marker.shoulder_variables, 2) + size(marker.hand_variables, 2);
@@ -104,5 +117,3 @@ global q0_model;
 global q0_LS;
 global kf;
 global ekf;
-q0_model = pi/20*ones(n, 1);
-q0_LS = pi/20*ones(n, 1);

@@ -733,7 +733,7 @@ switch selected
 end
 
 
-% If 'precompiuted' --> delete connections
+% If 'precomputed' --> delete connections
 if (strcmp(simModel_flag, 'precomputed') == 1)
 
     delete_line('master_thesis_simulink/System/Human arm/RightShoulder_joint', get_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/c1', 'PortHandles').RConn, get_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/jRightShoulder_rotx', 'PortHandles').LConn(2));

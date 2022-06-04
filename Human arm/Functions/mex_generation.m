@@ -1,4 +1,4 @@
-function mex_generation(links, sample_Time)
+function f_J = mex_generation(links, sample_Time)
 
 % mex_generation generates the following mex functions: - Phi
 %                                                       - Jpseudo
@@ -112,75 +112,6 @@ f_Jpseudo = Function('f_Jpseudo', {q, shou_vars, fore_vars, hand_vars}, {Jpseudo
 
 % Damped LS PseudoInverse function
 f_Jpseudo_Damped = Function('f_Jpseudo_Damped', {q, shou_vars, fore_vars, hand_vars}, {Jpseudo_Damped});
-
-
-
-
-for i = 1 : 10000
-
-    % SHOULDER
-    s_xmax = 0.02877 + 0.01;
-    s_xmin = -s_xmax;
-    sx = (s_xmax-s_xmin).*rand(1,1) + s_xmin;
-    s_ymax = 0;
-    s_ymin = -0.47828;
-    sy = (s_ymax-s_ymin).*rand(1,1) + s_ymin;
-    s_zmax = 0.02877 + 0.01;
-    s_zmin = -s_zmax;
-    sz = (s_zmax-s_zmin).*rand(1,1) + s_zmin;
-    ss = [sx;sy;sz];
-    %ss = [];
-
-    % FOREARM
-    f_xmax = 0.022803 + 0.01;
-    f_xmin = -f_xmax;
-    fx = (f_xmax-f_xmin).*rand(1,1) + f_xmin;
-    f_ymax = 0;
-    f_ymin = -0.2584;
-    fy = (f_ymax-f_ymin).*rand(1,1) + f_ymin;
-    f_zmax = 0.022803 + 0.01;
-    f_zmin = -f_zmax;
-    fz = (f_zmax-f_zmin).*rand(1,1) + f_zmin;
-    %ff = [fx;fy;fz];
-    ff = [];
-
-    % HAND
-    h_xmax = 0.12916/2 + 0.01;
-    h_xmin = -h_xmax;
-    hx = (h_xmax-h_xmin).*rand(1,2) + h_xmin;
-    h_ymax = 0;
-    h_ymin = -0.19374 - 0.01;
-    hy = (h_ymax-h_ymin).*rand(1,2) + h_ymin;
-    h_zmax = 0.045607 + 0.01;
-    h_zmin = -h_zmax;
-    hz = (h_zmax-h_zmin).*rand(1,2) + h_zmin;
-    hh = [hx;hy;hz];
-
-%     % q
-%     q_max = pi/10;
-%     q_min = 0;
-%     qq = (q_max-q_min).*rand(7,1) + q_min;
-%     %qq = zeros(7, 1);
-%     JJ = full(f_J(qq, ss, ff, hh));
-%     JJpseudo = (JJ'*JJ)^(-1)*JJ';
-%     %if (ss(2) < 0 && ss(2) > - 0.47828 && hh(2) < 0 && ff(2) < 0 && ff(2) > -0.2584)
-%     if (ss(2,1) < 0 && ss(2,1) > -0.47828 && hh(2,1) < 0 && hh(2,2) < 0)
-%         d = det(JJ'*JJ);
-%         svd(JJ'*JJ)
-%         rank(JJ'*JJ)
-%         disp(JJpseudo)
-%          %if (rank(JJ) ~= 7)
-%           if (rank(JJ) == 7)
-%             %disp(d)
-%             %disp(JJpseudo)
-%             if (d > 1e-15)
-% 
-%                 disp(d);
-%             end
-%           end
-%         
-%     end
-end
 
 %% Discretization Runge-Kutta
 % qk+1 = qk + 1/6*Ts*(k1 + 2k2 + 2k3 + k4) ---> qk+1 = f(qk, u_noisyk)
