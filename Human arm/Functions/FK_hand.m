@@ -3,7 +3,7 @@ function [Phi_hand, hand_variable] = FK_hand(marker_variable, q)
 % hand_Phi computes the position of the marker (placed in the HAND) expressed wrt Wrold RF
 
 % Human arm parameters
-run('human_arm_param');
+run('human_arm_parameters');
 
 % CasADi
 import casadi.*

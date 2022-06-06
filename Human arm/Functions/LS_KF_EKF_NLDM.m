@@ -31,6 +31,9 @@ set_param('master_thesis_simulink/Ros2Matlab', 'commented', 'on');
 % Number of DoF
 n = 7;
 
+global markers_shoulder markers_forearm markers_hand;
+set_markers_simulink(markers_shoulder, markers_forearm, markers_hand);
+
 % Model IC
 %q0_model = q0(1, :);
 set_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/jRightShoulder_rotx', 'PositionTargetValue', 'q0_model(1)');
@@ -74,11 +77,12 @@ switch simModel_flag
     
     case 'precomputed'
 
+        disp('aaa')
         % Joints' trajectory
         % q1
         set_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/jRightShoulder_rotx', 'TorqueActuationMode', 'ComputedTorque', 'MotionActuationMode', 'InputMotion');
         add_line('master_thesis_simulink/System/Human arm/RightShoulder_joint', get_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/c1', 'PortHandles').RConn, get_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/jRightShoulder_rotx', 'PortHandles').LConn(2));
-        
+        disp('aaa')
         % q2
         set_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/jRightShoulder_roty', 'TorqueActuationMode', 'ComputedTorque', 'MotionActuationMode', 'InputMotion');
         add_line('master_thesis_simulink/System/Human arm/RightShoulder_joint', get_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/c2', 'PortHandles').RConn, get_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/jRightShoulder_roty', 'PortHandles').LConn(2));

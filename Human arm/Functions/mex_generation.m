@@ -1,4 +1,4 @@
-function f_J = mex_generation(links, sample_Time)
+function f_J = mex_generation(links, sample_Time, generate)
 
 % mex_generation generates the following mex functions: - Phi
 %                                                       - Jpseudo
@@ -48,6 +48,10 @@ for i = 1 : m
     end
 end
 
+% Change directory
+directory = strcat('C code/S', num2str(s-1), '_F', num2str(f-1), '_H', num2str(h-1), '/');
+cd (directory);
+
 % SHOULDER, FOREARM, HAND variables
 shou_vars = [];
 fore_vars = [];
@@ -93,6 +97,7 @@ f_Phi = Function('f_Phi', {q, shou_vars, fore_vars, hand_vars}, {Phi});
 
 %% JACOBIAN
 
+global f_J;
 % Jacobian computation
 J = jacobian(Phi, q);
 
@@ -105,13 +110,13 @@ f_J = Function('f_J', {q, shou_vars, fore_vars, hand_vars}, {J});
 Jpseudo = (J'*J)^(-1) * J';
 
 % Damped LS PseudoInverse computation
-Jpseudo_Damped = (J'*J + eye(n)*exp(-det(J'*J)))^(-1) * J';
+%Jpseudo_Damped = (J'*J + eye(n)*exp(-det(J'*J)))^(-1) * J';
 
 % PseudoInverse function
 f_Jpseudo = Function('f_Jpseudo', {q, shou_vars, fore_vars, hand_vars}, {Jpseudo});
 
 % Damped LS PseudoInverse function
-f_Jpseudo_Damped = Function('f_Jpseudo_Damped', {q, shou_vars, fore_vars, hand_vars}, {Jpseudo_Damped});
+%f_Jpseudo_Damped = Function('f_Jpseudo_Damped', {q, shou_vars, fore_vars, hand_vars}, {Jpseudo_Damped});
 
 %% Discretization Runge-Kutta
 % qk+1 = qk + 1/6*Ts*(k1 + 2k2 + 2k3 + k4) ---> qk+1 = f(qk, u_noisyk)
@@ -147,34 +152,41 @@ f_G = Function('f_G', {q, shou_vars, fore_vars, hand_vars, u_noisy}, {G});
 
 %% Generate the mex functions
 
-% opts = struct('main', true, 'mex', true);
-% 
-% % Generate Phi
-% f_Phi.generate('f_Phi_mex.c', opts);
-% mex f_Phi_mex.c;
-% 
-% % Generate J
-% f_J.generate('f_J_mex.c', opts);
-% mex f_J_mex.c;
-% 
-% % Generate Jpseudo
-% f_Jpseudo.generate('f_Jpseudo_mex.c', opts);
-% mex f_Jpseudo_mex.c;
-% 
-% % Generate f
-% f_f.generate('f_f_mex.c', opts);
-% mex f_f_mex.c;
-% 
-% % Generate F
-% f_F.generate('f_Fekf_mex.c', opts);
-% mex f_Fekf_mex.c;
-% 
-% % Generate G
-% f_G.generate('f_Gekf_mex.c', opts);
-% mex f_Gekf_mex.c;
-% 
-% % Generate H
-% f_J.generate('f_Hekf_mex.c', opts);
-% mex f_Hekf_mex.c;
+switch generate
 
+    case 'true'
+
+        opts = struct('main', true, 'mex', true);
+        
+        % Generate Phi
+        f_Phi.generate('f_Phi_mex.c', opts);
+        mex f_Phi_mex.c;
+        
+        % Generate J
+        f_J.generate('f_J_mex.c', opts);
+        mex f_J_mex.c;
+        
+        % Generate Jpseudo
+        f_Jpseudo.generate('f_Jpseudo_mex.c', opts);
+        mex f_Jpseudo_mex.c;
+        
+        % Generate f
+        f_f.generate('f_f_mex.c', opts);
+        mex f_f_mex.c;
+        
+        % Generate F
+        f_F.generate('f_Fekf_mex.c', opts);
+        mex f_Fekf_mex.c;
+        
+        % Generate G
+        f_G.generate('f_Gekf_mex.c', opts);
+        mex f_Gekf_mex.c;
+        
+        % Generate H
+        f_J.generate('f_Hekf_mex.c', opts);
+        mex f_Hekf_mex.c;
+
+end
+%% Rechange directory
+cd ../..;
 end

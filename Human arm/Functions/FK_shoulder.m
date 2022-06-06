@@ -3,7 +3,7 @@ function [Phi_shou, shoulder_variable] = FK_shoulder(marker_variable, q)
 % shoulder_Phi computes the position of the marker (placed in the SHOULDER) expressed wrt Wrold RF
 
 % Human arm parameters
-run('human_arm_param');
+run('human_arm_parameters');
 
 % CasADi
 import casadi.*
