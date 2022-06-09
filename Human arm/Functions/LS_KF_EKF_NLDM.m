@@ -1,4 +1,4 @@
-function LS_KF_EKF_NLDM(method_flag, simModel_flag, markers, N_samples, C_code_folder)
+function LS_KF_EKF_NLDM(method_flag, simModel_flag, N_samples, C_code_folder)
 
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
@@ -32,6 +32,8 @@ set_param('master_thesis_simulink/Ros2Matlab', 'commented', 'on');
 n = 7;
 
 global markers_shoulder markers_forearm markers_hand;
+
+% Set blocks simulink
 set_markers_simulink(markers_shoulder, markers_forearm, markers_hand);
 
 % Model IC
@@ -43,6 +45,13 @@ set_param('master_thesis_simulink/System/Human arm/Elbow_joint/jRightElbow_rotx'
 set_param('master_thesis_simulink/System/Human arm/Wrist_joint/jRightWrist_rotx', 'PositionTargetValue', 'q0_model(5)');
 set_param('master_thesis_simulink/System/Human arm/Wrist_joint/jRightWrist_roty', 'PositionTargetValue', 'q0_model(6)');
 set_param('master_thesis_simulink/System/Human arm/Wrist_joint/jRightWrist_rotz', 'PositionTargetValue', 'q0_model(7)');
+
+% Delete precomputed connections in simulink
+c_line =  get_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/c1', 'LineHandles');
+if (c_line.RConn ~= -1) % There is a connection
+
+    delete_precomputed_connections();
+end
 
 %% Add path 'C code/C_code_folder' <-- target_folder
 set_Mex(C_code_folder);
@@ -77,12 +86,11 @@ switch simModel_flag
     
     case 'precomputed'
 
-        disp('aaa')
         % Joints' trajectory
         % q1
         set_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/jRightShoulder_rotx', 'TorqueActuationMode', 'ComputedTorque', 'MotionActuationMode', 'InputMotion');
         add_line('master_thesis_simulink/System/Human arm/RightShoulder_joint', get_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/c1', 'PortHandles').RConn, get_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/jRightShoulder_rotx', 'PortHandles').LConn(2));
-        disp('aaa')
+
         % q2
         set_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/jRightShoulder_roty', 'TorqueActuationMode', 'ComputedTorque', 'MotionActuationMode', 'InputMotion');
         add_line('master_thesis_simulink/System/Human arm/RightShoulder_joint', get_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/c2', 'PortHandles').RConn, get_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/jRightShoulder_roty', 'PortHandles').LConn(2));
@@ -200,6 +208,7 @@ switch selected
         %% Simulation
 
         output = sim("master_thesis_simulink.slx");
+
         %% Plot results
 
         legend_name = cell(n, 1);
@@ -221,7 +230,7 @@ switch selected
         global kf;
 
         % Number of markers
-        m = size(markers.shoulder_variables, 1) + size(markers.forearm_variables, 1) + size(markers.hand_variables, 1);
+        m = size(markers_shoulder, 2) + size(markers_forearm, 2) + size(markers_hand, 2);
 
         %% Comment blocks and set parameters 
 
@@ -241,14 +250,17 @@ switch selected
         %                     Deltapk   = H*Deltaqk + vk
 
         % F matrix --> df/dq evaluated at the equilibrium point
-        kf.F = full(f_Fekf_mex(kf.q_eq, markers.shoulder_variables, markers.forearm_variables, markers.hand_variables, kf.u_eq));
+        kf.F = full(f_Fekf_mex(kf.q_eq, markers_shoulder, markers_forearm, markers_hand, kf.u_eq));
         % G matrix --> df/du evaluated at the equilibrium point
-        kf.G = full(f_Gekf_mex(kf.q_eq, markers.shoulder_variables, markers.forearm_variables, markers.hand_variables, kf.u_eq));
+        kf.G = full(f_Gekf_mex(kf.q_eq, markers_shoulder, markers_forearm, markers_hand, kf.u_eq));
         
         % H matrix --> dPhi/dq (Jacobian J) evaluated at the equilibrium point
-        kf.H = full(f_J_mex(kf.q_eq, markers.shoulder_variables, markers.forearm_variables, markers.hand_variables));
+        kf.H = full(f_J_mex(kf.q_eq, markers_shoulder, markers_forearm, markers_hand));
         % J matrix --> dPhi/du = 0 
         kf.J = zeros(3*m, 3*m);
+
+        % p_eq
+        kf.p_eq = full(f_Phi_mex(kf.q_eq, markers_shoulder, markers_forearm, markers_hand));
 
         % F, G, H, J matrices
         set_param('master_thesis_simulink/System/KF vs OBS/Discrete State-Space', 'A', 'kf.F');
@@ -297,7 +309,7 @@ switch selected
         %% Plot KF estimate vs CONTINUOS joints' variables
         fig = figure;
         sgtitle("Linearized KF vs True");
-        
+
         for i = 1 : n
         
             q = strcat('$q_', num2str(i), '$');
@@ -306,7 +318,7 @@ switch selected
             subplot(3,3,i);
             plot(output.q.time, rad2deg(output.q.signals.values(:, i)), 'LineWidth', 2);
             hold on;
-            stairs(output.qk_kf.time, rad2deg(squeeze(output.qk_kf.signals.values(i, :))'), 'LineWidth', 2);
+            stairs(output.qk_kf.time, rad2deg(squeeze(output.qk_kf.signals.values(:, 1))'), 'LineWidth', 2);
             legend(q, qkf, 'Location', 'southeast', 'Interpreter', 'latex');
         end
 
@@ -333,7 +345,7 @@ switch selected
         %% Plot EKF estimate vs CONTINUOS joints' variables
         fig = figure;
         sgtitle("EKF vs True");
-        
+
         for i = 1 : n
         
             q = strcat('$q_', num2str(i), '$');
@@ -342,7 +354,7 @@ switch selected
             subplot(3,3,i);
             plot(output.q.time, rad2deg(output.q.signals.values(:, i)), 'LineWidth', 2);
             hold on;
-            stairs(output.qk_ekf.time, rad2deg(squeeze(output.qk_ekf.signals.values(i, :))'), 'LineWidth', 2);
+            stairs(output.qk_ekf.time, rad2deg(squeeze(output.qk_ekf.signals.values(:, i))'), 'LineWidth', 2);
             legend(q, qekf, 'Location', 'southeast', 'Interpreter', 'latex');
         end
 
@@ -523,7 +535,7 @@ switch selected
             hold on;
             stairs(output.out.time, rad2deg(squeeze(output.out.signals(2).values(i, :))'), 'LineWidth', 2);
             hold on;
-            stairs(output.out.time, rad2deg(squeeze(output.out.signals(4).values(i, :))'), 'LineWidth', 2);
+            stairs(output.out.time, rad2deg(squeeze(output.out.signals(4).values(:, i))'), 'LineWidth', 2);
             legend(q, qls, qekf, 'Location', 'southeast', 'Interpreter', 'latex');
         end
 
@@ -736,19 +748,6 @@ switch selected
 
 end
 
-
-% If 'precomputed' --> delete connections
-if (strcmp(simModel_flag, 'precomputed') == 1)
-
-    delete_line('master_thesis_simulink/System/Human arm/RightShoulder_joint', get_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/c1', 'PortHandles').RConn, get_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/jRightShoulder_rotx', 'PortHandles').LConn(2));
-    delete_line('master_thesis_simulink/System/Human arm/RightShoulder_joint', get_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/c2', 'PortHandles').RConn, get_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/jRightShoulder_roty', 'PortHandles').LConn(2));
-    delete_line('master_thesis_simulink/System/Human arm/RightShoulder_joint', get_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/c3', 'PortHandles').RConn, get_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/jRightShoulder_rotz', 'PortHandles').LConn(2));
-    delete_line('master_thesis_simulink/System/Human arm/Elbow_joint', get_param('master_thesis_simulink/System/Human arm/Elbow_joint/c1', 'PortHandles').RConn, get_param('master_thesis_simulink/System/Human arm/Elbow_joint/jRightElbow_rotx', 'PortHandles').LConn(2));
-
-    delete_line('master_thesis_simulink/System/Human arm/Wrist_joint', get_param('master_thesis_simulink/System/Human arm/Wrist_joint/c1', 'PortHandles').RConn, get_param('master_thesis_simulink/System/Human arm/Wrist_joint/jRightWrist_rotx', 'PortHandles').LConn(2));
-    delete_line('master_thesis_simulink/System/Human arm/Wrist_joint', get_param('master_thesis_simulink/System/Human arm/Wrist_joint/c2', 'PortHandles').RConn, get_param('master_thesis_simulink/System/Human arm/Wrist_joint/jRightWrist_roty', 'PortHandles').LConn(2));
-    delete_line('master_thesis_simulink/System/Human arm/Wrist_joint', get_param('master_thesis_simulink/System/Human arm/Wrist_joint/c3', 'PortHandles').RConn, get_param('master_thesis_simulink/System/Human arm/Wrist_joint/jRightWrist_rotz', 'PortHandles').LConn(2));
-end
-
-
+% Remobe blocks simulink
+remove_blocks_simulink(size(markers_shoulder, 2), size(markers_forearm, 2), size(markers_hand, 2));
 end

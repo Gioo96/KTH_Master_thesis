@@ -1,4 +1,4 @@
-function f_J = mex_generation(links, sample_Time, generate)
+function mex_generation(links, sample_Time, generate)
 
 % mex_generation generates the following mex functions: - Phi
 %                                                       - Jpseudo
