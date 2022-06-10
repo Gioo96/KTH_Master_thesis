@@ -26,7 +26,10 @@ global old_estimate_vel;
 
 topic_m1 = '/qualisys/Super_marker_1/odom';
 topic_m2 = "/qualisys/Super_marker_2/odom";
-rossubscriber(topic_m1, @Callback_m1, 'DataFormat', 'struct');
+msg_1 = rostopic("echo", "/qualisys/Super_marker_1/odom");
+m1 = callback_class(topic_m1, zeros(1,3));
+m1.ros_subscribe
+%rossubscriber(topic_m1, @Callback_m1, 'DataFormat', 'struct');
 pause(0.5);
 
 offset_x = [0.2 0 0 0];

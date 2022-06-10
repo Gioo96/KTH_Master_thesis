@@ -21,15 +21,16 @@ classdef callback_class
             end
         end
 
-        function callback(~, obj)
+        function callback(~, msg)
         
+
             %% Defining GLOBAL variables
             % Count every time Callback is called since C1 is met
             disp('aaaaaaaa')
             global count;
             
             % Measurement position and velocity
-            %global meas_pos;
+            global meas_pos;
             global meas_vel;
             
             % Current time of simulation
@@ -65,9 +66,8 @@ classdef callback_class
             % Extract data from the measurement
             % Set threshold to 0.4
             
-            obj.meas_pos = [obj.message.Pose.Pose.Position.X msg.Pose.Pose.Position.Y msg.Pose.Pose.Position.Z];
-            obj.meas_pos
-            meas_vel = [obj.message.Twist.Twist.Linear.X msg.Twist.Twist.Linear.Y msg.Twist.Twist.Linear.Z];
+            meas_pos = [msg.Pose.Pose.Position.X msg.Pose.Pose.Position.Y msg.Pose.Pose.Position.Z];
+            meas_vel = [msg.Twist.Twist.Linear.X msg.Twist.Twist.Linear.Y msg.Twist.Twist.Linear.Z];
             
             % C1 --> Condition satisfied at max once
             if (obj.meas_pos(1) > 0 && count == 0)
@@ -97,6 +97,16 @@ classdef callback_class
 
             %disp(obj.message);
             rossubscriber('/qualisys/Super_marker_1/odom', @obj.callback, 'DataFormat', 'struct');
+        end
+
+        function dispp(a)
+
+            disp(a);
+        end
+
+        function call()
+
+            
         end
     end
 end

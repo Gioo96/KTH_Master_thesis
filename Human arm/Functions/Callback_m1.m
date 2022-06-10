@@ -1,4 +1,4 @@
-function Callback_m1(~, message)
+function  Callback_m1(~, message)
 
 %% Defining GLOBAL variables
 % Count every time Callback is called since C1 is met
