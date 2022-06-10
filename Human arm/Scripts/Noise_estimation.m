@@ -21,12 +21,15 @@ global meas_vel;
 global current_time;
 global start;
 global count;
-global covariance_pos_current;
-global covariance_vel_current;
 global old_estimate_pos;
 global old_estimate_vel;
 
-vel = rossubscriber("/qualisys/Super_marker_1/odom", @Callback, 'DataFormat', 'struct');
+topic_m1 = '/qualisys/Super_marker_1/odom';
+topic_m2 = "/qualisys/Super_marker_2/odom";
+msg_1 = rostopic("echo", "/qualisys/Super_marker_1/odom");
+m1 = callback_class(topic_m1, zeros(1,3));
+m1.ros_subscribe
+%rossubscriber(topic_m1, @Callback_m1, 'DataFormat', 'struct');
 pause(0.5);
 
 offset_x = [0.2 0 0 0];
@@ -35,7 +38,7 @@ offset_y = [0 -0.5 0 0];
 
 i = 1;
 
-while i <= number_simulations
+while i <= 2
 
     % Markers' POSITION
    figures.fig_1 = figure(1);
@@ -107,7 +110,7 @@ while i <= number_simulations
     n_samples = 0;
     disp(current_time);
     while ~stop
-    
+
         if (meas_pos(1) < 0)
     
             stop = true;
@@ -149,14 +152,6 @@ while i <= number_simulations
     position_top_left = [];
 
 end
-
-% Noise
-% noise.R = 0.00001 * diag(ones(m*3, 1));
-% noise.R_seed = 1;
-% noise.Q = 0.00001 * diag(ones(n, 1));
-% noise.Q_seed = 2;
-% noise.Nu = 0.0000001 * diag(ones(m*3, 1));
-% noise.Nu_seed = 3;
 
 % Shutdown ROS
 rosshutdown;
