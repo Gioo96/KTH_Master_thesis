@@ -27,7 +27,6 @@ global covariance_pos_current;
 % Covariance of the marker velocity noise
 global covariance_vel_current;
 
-
 % Initialization
 if isempty(count)
 
