@@ -22,10 +22,9 @@ ha_markers_list = [];
 %% Add path 'C code/C_code_folder' <-- target_folder
 set_Mex(C_code_folder);
 
-num_simulations_tot = 0;
 num_simulations = 0;
 markers_found = false;
-mean_rcond_max = -1;
+mean_rcond_init = -1;
 while ~markers_found
 
     %% Polar coordinates
@@ -98,21 +97,17 @@ while ~markers_found
     % If there are no singularities then the set of markers is good
     if ~is_Singular
 
-        if (mean_rcond > mean_rcond_max)
+        if (mean_rcond > mean_rcond_init)
 
             mean_rcond_max = mean_rcond;
-            num_simulations = num_simulations + 1;
-            disp(mean_rcond_max);
         end
 
-        if (num_simulations == 4)
-        
-            markers_found = true;
-        end
+        if (num_simulations_ok >)
+        markers_found = true;
     end
 
-    num_simulations_tot = num_simulations_tot + 1;
-    if (num_simulations_tot > max_number_simulations)
+    num_simulations = num_simulations + 1;
+    if (num_simulations > max_number_simulations)
 
         disp('No set of markers found !!')
         break;
