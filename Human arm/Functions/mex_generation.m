@@ -62,7 +62,7 @@ q = SX.sym('q', [n, 1]);
 
 % Forward kinematics initialization
 Phi = SX.sym('phi', [m * 3, 1]);
-
+R = SX.sym('r', [3, 3]);
 % Forward kinematics computation
 % SHOULDER
 for s = 1 : size(m_shoulder_str, 2)
@@ -70,6 +70,7 @@ for s = 1 : size(m_shoulder_str, 2)
     [T, variable] = FK_shoulder(char(m_shoulder_str(s)), q);
     shou_vars = [shou_vars, variable];
     Phi((s-1)*3+1 : (s-1)*3+3) = T(1:3, 4);
+    R = T(1:3, 1:3);
 end
 
 % FOREARM
@@ -94,7 +95,7 @@ end
 
 % Phi function
 f_Phi = Function('f_Phi', {q, shou_vars, fore_vars, hand_vars}, {Phi});
-
+f_R = Function('f_R', {q, shou_vars, fore_vars, hand_vars}, {R});
 %% JACOBIAN
 
 global f_J;
@@ -159,32 +160,36 @@ switch generate
         opts = struct('main', true, 'mex', true);
         
         % Generate Phi
-        f_Phi.generate('f_Phi_mex.c', opts);
-        mex f_Phi_mex.c;
+%         f_Phi.generate('f_Phi_mex.c', opts);
+%         mex f_Phi_mex.c;
         
-        % Generate J
-        f_J.generate('f_J_mex.c', opts);
-        mex f_J_mex.c;
-        
-        % Generate Jpseudo
-        f_Jpseudo.generate('f_Jpseudo_mex.c', opts);
-        mex f_Jpseudo_mex.c;
-        
-        % Generate f
-        f_f.generate('f_f_mex.c', opts);
-        mex f_f_mex.c;
-        
-        % Generate F
-        f_F.generate('f_Fekf_mex.c', opts);
-        mex f_Fekf_mex.c;
-        
-        % Generate G
-        f_G.generate('f_Gekf_mex.c', opts);
-        mex f_Gekf_mex.c;
-        
-        % Generate H
-        f_J.generate('f_Hekf_mex.c', opts);
-        mex f_Hekf_mex.c;
+        % Generate R
+        f_R.generate('f_R_mex.c', opts);
+        mex f_R_mex.c;
+
+%         % Generate J
+%         f_J.generate('f_J_mex.c', opts);
+%         mex f_J_mex.c;
+%         
+%         % Generate Jpseudo
+%         f_Jpseudo.generate('f_Jpseudo_mex.c', opts);
+%         mex f_Jpseudo_mex.c;
+%         
+%         % Generate f
+%         f_f.generate('f_f_mex.c', opts);
+%         mex f_f_mex.c;
+%         
+%         % Generate F
+%         f_F.generate('f_Fekf_mex.c', opts);
+%         mex f_Fekf_mex.c;
+%         
+%         % Generate G
+%         f_G.generate('f_Gekf_mex.c', opts);
+%         mex f_Gekf_mex.c;
+%         
+%         % Generate H
+%         f_J.generate('f_Hekf_mex.c', opts);
+%         mex f_Hekf_mex.c;
 
 end
 %% Rechange directory

@@ -749,5 +749,5 @@ switch selected
 end
 
 % Remobe blocks simulink
-remove_blocks_simulink(size(markers_shoulder, 2), size(markers_forearm, 2), size(markers_hand, 2));
+%remove_blocks_simulink(size(markers_shoulder, 2), size(markers_forearm, 2), size(markers_hand, 2));
 end
