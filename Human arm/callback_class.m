@@ -35,7 +35,7 @@ classdef callback_class < handle
 
         function aa = ros_subscribe(obj)
 
-            obj.rospub = rossubscriber(obj.topic, @obj.callback, 'DataFormat', 'struct');
+            obj.rospub = rossubscriber(obj.topic, @obj.callback_sim, 'DataFormat', 'struct');
             aa = obj.rospub;
         end
 
@@ -94,6 +94,34 @@ classdef callback_class < handle
             end
         end
 
+        function callback_sim(~, msg)
+
+            % # marker = {1,2,3,..}
+            persistent marker;
+            if isempty(marker)
+
+                marker = msg.ChildFrameId(14);
+            end
+
+            % Access properties
+            obj = callback_class.access_properties(marker);
+
+            obj.meas_pos = [msg.Pose.Pose.Position.X msg.Pose.Pose.Position.Y msg.Pose.Pose.Position.Z];
+            obj.meas_vel = [msg.Twist.Twist.Linear.X msg.Twist.Twist.Linear.Y msg.Twist.Twist.Linear.Z];
+
+            % C1 --> Condition satisfied at max once           
+            if (obj.meas_pos(1) > 0 && obj.count == 0)
+
+                obj.start = true;
+            end
+            
+            % Condition always satisfied from condition C1 onward
+            if obj.start
+            
+                sim('master_thesis_simulink.slx');
+            end
+        end
+
         function simulation(number_simulations)
 
             % Access properties
@@ -106,8 +134,8 @@ classdef callback_class < handle
             while i <= number_simulations
             
                 % Markers' POSITION
-               figures.fig_1 = figure(1);
-               set(figures.fig_1, 'position', [10, 10, 1500, 500]);
+               fig_1 = figure(1);
+               set(fig_1, 'position', [10, 10, 1500, 500]);
                sgtitle('Marker Position');
             
                subp.(sprintf('x%d', i))= subplot(3,5,i);
@@ -121,8 +149,8 @@ classdef callback_class < handle
                plotp.(sprintf('z%d', i)) = animatedline(subp.(sprintf('z%d', i)), 'Color', 'g', 'LineWidth', 1);
             
                % Markers' VELOCITY
-               figures.fig_2 = figure(2);
-               set(figures.fig_2, 'position', [10, 10, 1500, 500]);
+               fig_2 = figure(2);
+               set(fig_2, 'position', [10, 10, 1500, 500]);
                sgtitle('Marker Velocity');
             
                subv.(sprintf('x%d', i))= subplot(3,5,i);
@@ -135,8 +163,8 @@ classdef callback_class < handle
                plotv.(sprintf('y%d', i)) = animatedline(subv.(sprintf('y%d', i)), 'Color', 'b', 'LineWidth', 1);
                plotv.(sprintf('z%d', i)) = animatedline(subv.(sprintf('z%d', i)), 'Color', 'g', 'LineWidth', 1);
             
-               figures.fig_5 = figure(5);
-               set(figures.fig_5, 'position', [10, 10, 1500, 500]);
+               fig_3 = figure(5);
+               set(fig_3, 'position', [10, 10, 1500, 500]);
                position_top_left = [];
             
                if (i == 1)
@@ -154,7 +182,7 @@ classdef callback_class < handle
                end
                 
             
-               ax = axes('Parent', figures.fig_5, ...
+               ax = axes('Parent', fig_3, ...
                     'Position', current_position, ...
                     'Box', 'on');
                text(0.35, 0.95, sprintf('\\bf Sim n. %d', i));
