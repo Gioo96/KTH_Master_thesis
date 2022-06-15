@@ -105,13 +105,14 @@ while ~markers_found
             disp(mean_rcond_max);
         end
 
-        if (num_simulations == 4)
+        if (num_simulations == 3)
         
             markers_found = true;
         end
     end
 
     num_simulations_tot = num_simulations_tot + 1;
+    num_simulations_tot
     if (num_simulations_tot > max_number_simulations)
 
         disp('No set of markers found !!')
@@ -131,6 +132,13 @@ if markers_found
     % Run simulation with given trasjectory and set of markers
     set_markers_simulink(m_shoulder, m_forearm, m_hand);
     q0_model = q_trajectory.signals.values(1, :)';
+
+    % Comment/Uncomment blocks
+    set_param('master_thesis_simulink/System', 'commented', 'off');
+    set_param('master_thesis_simulink/Ros2Matlab', 'commented', 'on');
+    set_param('master_thesis_simulink/Experiments', 'commented', 'on');
+    simulink.time = 10;
+    set_param('master_thesis_simulink', 'StopTime', 'simulink.time');
     sim('master_thesis_simulink.slx');
 
     % Remove blocks

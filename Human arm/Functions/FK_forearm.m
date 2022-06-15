@@ -34,7 +34,7 @@ RW_BS = RW_x * Rx_y * Ry_BS; % W --> B_shoulder
 %
 % ELBOW
 %
-Rx_el = [cos(q(4)) -sin(q(4)) 0;
+Rz_el = [cos(q(4)) -sin(q(4)) 0;
             sin(q(4)) cos(q(4)) 0;
             0 0 1];
 
@@ -43,9 +43,7 @@ trans_BS_FS = [0; -arm.shoulder.length; 0];
 % ROTATION+TRANSLATION: F_shoulder to World
 TW_FS = [RW_BS RW_BS * trans_BS_FS;0 0 0 1];
 % ROTATION: F_shoulder --> B_elbow
-RFS_x = align.Rz * align.Rx * Rx_el; % F_shoulder --> elbow.Rx
-Rx_z = (align.Rz * align.Rx)'; % elbow.Rx --> elbow.Rz
-RFS_BE = RFS_x * Rx_z; % F_shoulder --> B_elbow
+RFS_BE = Rz_el; % F_shoulder --> B_elbow
 
 % TRANSLATION: Marker wrt B_elbow
 trans_BE_M = forearm_variable;

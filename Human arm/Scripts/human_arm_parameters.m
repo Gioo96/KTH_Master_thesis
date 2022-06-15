@@ -129,7 +129,7 @@ number_samples = simulink.time/sample_Time;
 global noise;
 noise.R = 7.9099e-07 * diag(ones(m*3, 1)); % ESTIMATED
 noise.R_seed = 1;
-noise.Q = 0.1 * diag(ones(n, 1));
+noise.Q = 1 * diag(ones(n, 1));
 noise.Q_seed = 2;
 %noise.Nu = 0.0285 * diag(ones(m*3, 1)); % ESTIMATED
 noise.Nu = 0.0285 * diag(ones(m*3, 1));

@@ -32,7 +32,7 @@ set_param('master_thesis_simulink/Ros2Matlab', 'commented', 'on');
 n = 7;
 
 global markers_shoulder markers_forearm markers_hand;
-
+disp(m)
 % Set blocks simulink
 set_markers_simulink(markers_shoulder, markers_forearm, markers_hand);
 
@@ -345,7 +345,7 @@ switch selected
         %% Plot EKF estimate vs CONTINUOS joints' variables
         fig = figure;
         sgtitle("EKF vs True");
-        
+
         for i = 1 : n
         
             q = strcat('$q_', num2str(i), '$');
@@ -354,7 +354,7 @@ switch selected
             subplot(3,3,i);
             plot(output.q.time, rad2deg(output.q.signals.values(:, i)), 'LineWidth', 2);
             hold on;
-            stairs(output.qk_ekf.time, rad2deg(squeeze(output.qk_ekf.signals.values(i, :))'), 'LineWidth', 2);
+            stairs(output.qk_ekf.time, rad2deg(squeeze(output.qk_ekf.signals.values(:, i))'), 'LineWidth', 2);
             legend(q, qekf, 'Location', 'southeast', 'Interpreter', 'latex');
         end
 
@@ -535,7 +535,7 @@ switch selected
             hold on;
             stairs(output.out.time, rad2deg(squeeze(output.out.signals(2).values(i, :))'), 'LineWidth', 2);
             hold on;
-            stairs(output.out.time, rad2deg(squeeze(output.out.signals(4).values(i, :))'), 'LineWidth', 2);
+            stairs(output.out.time, rad2deg(squeeze(output.out.signals(4).values(:, i))'), 'LineWidth', 2);
             legend(q, qls, qekf, 'Location', 'southeast', 'Interpreter', 'latex');
         end
 
@@ -749,5 +749,5 @@ switch selected
 end
 
 % Remobe blocks simulink
-% remove_blocks_simulink(size(markers_shoulder, 2), size(markers_forearm, 2), size(markers_hand, 2));
+remove_blocks_simulink(size(markers_shoulder, 2), size(markers_forearm, 2), size(markers_hand, 2));
 end
