@@ -10,10 +10,6 @@ markers_hand = ha_markers;
 sh_number = size(sh_markers, 2);
 fo_number = size(fo_markers, 2);
 ha_number = size(ha_markers, 2);
-% Delete all the Markers blocks
-% delete_block('master_thesis_simulink/System/Human arm/RightShoulder/Markers');
-% delete_block('master_thesis_simulink/System/Human arm/RightForeArm/Markers');
-% delete_block('master_thesis_simulink/System/Human arm/RightHand/Markers');
 
 % Count number of markers
 count = 0;
