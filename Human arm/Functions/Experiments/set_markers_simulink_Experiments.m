@@ -22,14 +22,18 @@ if (sh_number > 0)
     pdoti_name = strcat('pdot_', num2str(count));
     set_param(strcat(path, '/p_1'), 'GotoTag', pi_name);
     set_param(strcat(path, '/pdot_1'), 'GotoTag', pdoti_name);
-    % Set parameters for M1
-%     set_param(strcat(path, '/M1/translation_x'), 'TranslationCartesianOffset', '[markers_shoulder(1,1) 0 0]');
-%     set_param(strcat(path, '/M1/translation_y'), 'TranslationCartesianOffset', '[0 markers_shoulder(2,1) 0]');
-%     set_param(strcat(path, '/M1/translation_z'), 'TranslationCartesianOffset', '[0 0 markers_shoulder(3,1)]');
+
     set_param(strcat(path, '/M1/p_1'), 'Name', 'p_1');
     set_param(strcat(path, '/M1/pdot_1'), 'Name', 'pdot_1');
     current_position_pi = get_param(strcat(path, '/p_1'), 'Position');
     current_position_pdoti = get_param(strcat(path, '/pdot_1'), 'Position');
+
+    % Selector
+    indeces = {'1:3', '1'};
+    set_param(strcat(path, '/M1/Selector'), 'IndexParamArray', indeces);
+
+    % From
+    set_param(strcat(path, '/M1/From'), 'GotoTag', 'pShoulder_i_0');
 
     if (sh_number > 1)
 
@@ -47,9 +51,6 @@ if (sh_number > 0)
 
             % Set markers parameters
             marker_i = strcat(path, '/M', num2str(i));
-%             set_param(strcat(marker_i, '/translation_x'), 'TranslationCartesianOffset', strcat('[markers_shoulder(1,', num2str(i), ') 0 0]'));
-%             set_param(strcat(marker_i, '/translation_y'), 'TranslationCartesianOffset', strcat('[0 markers_shoulder(2,', num2str(i), ') 0]'));
-%             set_param(strcat(marker_i, '/translation_z'), 'TranslationCartesianOffset', strcat('[0 0 markers_shoulder(3,', num2str(i), ')]'));
 
             % Add connections and output outside M2,... blocks
             pi = add_block(strcat(path, '/p_1'), strcat(path, '/p_1'), 'MakeNameUnique', 'on');
@@ -63,7 +64,6 @@ if (sh_number > 0)
 
             pdoti = add_block(strcat(path, '/pdot_1'), strcat(path, '/pdot_1'), 'MakeNameUnique', 'on');
             pdoti_out = get_param('master_thesis_simulink/Experiments/Human arm/RightShoulder/Markers/M2', 'PortHandles').LConn(2);
-            pdoti_out
             pdoti_in = get_param(pdoti, 'PortHandles').Inport;
             set_param(pdoti, 'Position', current_position_pdoti + [0 80 0 80]);
             current_position_pdoti = get_param(pdoti, 'Position');
@@ -71,6 +71,13 @@ if (sh_number > 0)
             pdoti_name = strcat('pdot_', num2str(count));
             set_param(pdoti, 'GotoTag', pdoti_name);
             set_param(pdoti, 'Name', pdoti_name);
+
+            % Selector
+            indeces = {'1:3', num2str(i)};
+            set_param(marker_i, 'IndexParamArray', indeces);
+
+            % From
+            set_param(strcat(marker_i, '/From'), 'GotoTag', 'pShoulder_i_0');
         end
     end
 end
@@ -93,15 +100,18 @@ if (fo_number > 0)
     pdoti_name = strcat('pdot_', num2str(count));
     set_param(strcat(path, '/p_1'), 'GotoTag', pi_name);
     set_param(strcat(path, '/pdot_1'), 'GotoTag', pdoti_name);
-    % Set parameters for M1
-%     set_param(strcat(path, '/M1/translation_x'), 'TranslationCartesianOffset', '[markers_forearm(1,1) 0 0]');
-%     set_param(strcat(path, '/M1/translation_y'), 'TranslationCartesianOffset', '[0 markers_forearm(2,1) 0]');
-%     set_param(strcat(path, '/M1/translation_z'), 'TranslationCartesianOffset', '[0 0 markers_forearm(3,1)]');
 
     set_param(strcat(path, '/M1/p_1'), 'Name', 'p_1');
     set_param(strcat(path, '/M1/pdot_1'), 'Name', 'pdot_1');
     current_position_pi = get_param(strcat(path, '/p_1'), 'Position');
     current_position_pdoti = get_param(strcat(path, '/pdot_1'), 'Position');
+
+    % Selector
+    indeces = {'1:3', '1'};
+    set_param(strcat(path, '/M1/Selector'), 'IndexParamArray', indeces);
+
+    % From
+    set_param(strcat(path, '/M1/From'), 'GotoTag', 'pForearm_i_0');
 
     if (fo_number > 1)
 
@@ -119,9 +129,6 @@ if (fo_number > 0)
 
             % Set markers parameters
             marker_i = strcat(path, '/M', num2str(i));
-%             set_param(strcat(marker_i, '/translation_x'), 'TranslationCartesianOffset', strcat('[markers_forearm(1,', num2str(i), ') 0 0]'));
-%             set_param(strcat(marker_i, '/translation_y'), 'TranslationCartesianOffset', strcat('[0 markers_forearm(2,', num2str(i), ') 0]'));
-%             set_param(strcat(marker_i, '/translation_z'), 'TranslationCartesianOffset', strcat('[0 0 markers_forearm(3,', num2str(i), ')]'));
 
             % Add connections and output outside M2,... blocks
             pi = add_block(strcat(path, '/p_1'), strcat(path, '/p_1'), 'MakeNameUnique', 'on');
@@ -141,6 +148,13 @@ if (fo_number > 0)
             add_line('master_thesis_simulink/Experiments/Human arm/RightForeArm/Markers', get_param(Mi, 'PortHandles').Outport(2), pdoti_in, 'autorouting', 'on');
             pdoti_name = strcat('pdot_', num2str(count));
             set_param(pdoti, 'GotoTag', pdoti_name);
+
+            % Selector
+            indeces = {'1:3', num2str(i)};
+            set_param(marker_i, 'IndexParamArray', indeces);
+
+            % From
+            set_param(strcat(marker_i, '/From'), 'GotoTag', 'pForearm_i_0');
         end
     end
 end
@@ -163,14 +177,18 @@ if (ha_number > 0)
     pdoti_name = strcat('pdot_', num2str(count));
     set_param(strcat(path, '/p_1'), 'GotoTag', pi_name);
     set_param(strcat(path, '/pdot_1'), 'GotoTag', pdoti_name);
-    % Set parameters for M1
-%     set_param(strcat(path, '/M1/translation_x'), 'TranslationCartesianOffset', '[markers_hand(1,1) 0 0]');
-%     set_param(strcat(path, '/M1/translation_y'), 'TranslationCartesianOffset', '[0 markers_hand(2,1) 0]');
-%     set_param(strcat(path, '/M1/translation_z'), 'TranslationCartesianOffset', '[0 0 markers_hand(3,1)]');
+
     set_param(strcat(path, '/M1/p_1'), 'Name', 'p_1');
     set_param(strcat(path, '/M1/pdot_1'), 'Name', 'pdot_1');
     current_position_pi = get_param(strcat(path, '/p_1'), 'Position');
     current_position_pdoti = get_param(strcat(path, '/pdot_1'), 'Position');
+
+    % Selector
+    indeces = {'1:3', '1'};
+    set_param(strcat(path, '/M1/Selector'), 'IndexParamArray', indeces);
+
+    % From
+    set_param(strcat(path, '/M1/From'), 'GotoTag', 'pHand_i_0');
 
     if (ha_number > 1)
 
@@ -187,10 +205,6 @@ if (ha_number > 0)
 
             % Set markers parameters
             marker_i = strcat(path, '/M', num2str(i));
-%             set_param(strcat(marker_i, '/translation_x'), 'TranslationCartesianOffset', strcat('[markers_hand(1,', num2str(i), ') 0 0]'));
-%             set_param(strcat(marker_i, '/translation_y'), 'TranslationCartesianOffset', strcat('[0 markers_hand(2,', num2str(i), ') 0]'));
-%             set_param(strcat(marker_i, '/translation_z'), 'TranslationCartesianOffset', strcat('[0 0 markers_hand(3,', num2str(i), ')]'));
-
 
             % Add connections and output outside M2,... blocks
             pi = add_block(strcat(path, '/p_1'), strcat(path, '/p_1'), 'MakeNameUnique', 'on');
@@ -210,6 +224,13 @@ if (ha_number > 0)
             add_line('master_thesis_simulink/Experiments/Human arm/RightHand/Markers', get_param(Mi, 'PortHandles').Outport(2), pdoti_in, 'autorouting', 'on');
             pdoti_name = strcat('pdot_', num2str(count));
             set_param(pdoti, 'GotoTag', pdoti_name);
+
+            % Selector
+            indeces = {'1:3', num2str(i)};
+            set_param(marker_i, 'IndexParamArray', indeces);
+
+            % From
+            set_param(strcat(marker_i, '/From'), 'GotoTag', 'pHand_i_0');
             
        end
    end

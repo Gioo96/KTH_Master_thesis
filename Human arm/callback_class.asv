@@ -33,10 +33,16 @@ classdef callback_class < handle
         end
 
 
-        function aa = ros_subscribe(obj)
+        function ros_sub = ros_subscribe(obj)
 
             obj.rospub = rossubscriber(obj.topic, @obj.callback, 'DataFormat', 'struct');
-            aa = obj.rospub;
+            ros_sub = obj.rospub;
+        end
+
+        function ros_sub = ros_subscribe_tuningParameters(obj)
+
+            obj.rospub = rossubscriber(obj.topic, @obj.callback_tuningParameters, 'DataFormat', 'struct');
+            ros_sub = obj.rospub;
         end
 
     end
@@ -95,6 +101,38 @@ classdef callback_class < handle
             end
         end
 
+        function callback_tuningParameters(~, msg)
+
+            % # marker = {1,2,3,..}
+            persistent marker;
+            if isempty(marker)
+
+                marker = msg.ChildFrameId(14);
+            end
+
+            % Access properties
+            obj = callback_class.access_properties(marker);
+
+            obj.meas_pos = [msg.Pose.Pose.Position.X msg.Pose.Pose.Position.Y msg.Pose.Pose.Position.Z];
+            obj.meas_vel = [msg.Twist.Twist.Linear.X msg.Twist.Twist.Linear.Y msg.Twist.Twist.Linear.Z];
+
+            % C1 --> Condition satisfied at max once           
+            if (obj.meas_pos(1) > 0 && obj.count == 0)
+
+                obj.start = true;
+            end
+        end
+
+
+        function simulation_tuningParameters(marker)
+
+            persistent obj_callback;
+            if isempty(obj_callback)
+
+                obj_callback = callback_class(marker);               
+            end
+            obj = obj_callback;
+        end
 
         function simulation(marker, number_simulations, start_slx)
 
@@ -112,7 +150,11 @@ classdef callback_class < handle
                     pause(0.00001);
                 end
 
+                % Run simulation
+                set_param('master_thesis_simulink/System', 'commented', 'on');
+                set_param('master_thesis_simulink/Ros2Matlab', 'commented', 'off');
                 sim('master_thesis_simulink.slx');
+
             else
 
                 offset_x = [0.2 0 0 0];

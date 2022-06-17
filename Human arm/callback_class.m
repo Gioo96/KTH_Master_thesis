@@ -33,10 +33,16 @@ classdef callback_class < handle
         end
 
 
-        function aa = ros_subscribe(obj)
+        function ros_sub = ros_subscribe(obj)
 
             obj.rospub = rossubscriber(obj.topic, @obj.callback, 'DataFormat', 'struct');
-            aa = obj.rospub;
+            ros_sub = obj.rospub;
+        end
+
+        function ros_sub = ros_subscribe_tuningParameters(obj)
+
+            obj.rospub = rossubscriber(obj.topic, @obj.callback_tuningParameters, 'DataFormat', 'struct');
+            ros_sub = obj.rospub;
         end
 
     end
@@ -95,13 +101,53 @@ classdef callback_class < handle
             end
         end
 
+        function callback_tuningParameters(~, msg)
+
+            % # marker = {1,2,3,..}
+            persistent marker;
+            if isempty(marker)
+
+                marker = msg.ChildFrameId(14);
+            end
+
+            % Access properties
+            obj = callback_class.access_properties(marker);
+
+            obj.meas_pos = [msg.Pose.Pose.Position.X msg.Pose.Pose.Position.Y msg.Pose.Pose.Position.Z];
+            obj.meas_vel = [msg.Twist.Twist.Linear.X msg.Twist.Twist.Linear.Y msg.Twist.Twist.Linear.Z];
+
+            % C1 --> Condition satisfied at max once           
+            if (obj.meas_pos(1) > 0 && obj.count == 0)
+
+                obj.start = true;
+            end
+        end
+
+
+        function simulation_tuningParameters(marker)
+
+            % Access properties
+            obj = callback_class.access_properties(marker);
+
+            % SUbscriber
+            rospub = rossubscriber(obj.topic, @obj.callback_tuningParameters, 'DataFormat', 'struct');
+
+            % Continue only if C1 is met
+            while ~obj.start
+            
+                pause(0.00001);
+            end
+
+            % Run simulation
+            sim('master_thesis_simulink.slx');
+        end
 
         function simulation(marker, number_simulations, start_slx)
 
             % Access properties
             obj = callback_class.access_properties(marker);
 
-            % SUbscriber
+            % Subscriber
             rospub = rossubscriber(obj.topic, @obj.callback, 'DataFormat', 'struct');
 
             if start_slx
@@ -116,7 +162,7 @@ classdef callback_class < handle
                 set_param('master_thesis_simulink/System', 'commented', 'on');
                 set_param('master_thesis_simulink/Ros2Matlab', 'commented', 'off');
                 sim('master_thesis_simulink.slx');
-                disp('aaaaaa');
+
             else
 
                 offset_x = [0.2 0 0 0];
