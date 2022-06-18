@@ -74,7 +74,7 @@ if (sh_number > 0)
 
             % Selector
             indeces = {'1:3', num2str(i)};
-            set_param(marker_i, 'IndexParamArray', indeces);
+            set_param(strcat(marker_i, '/Selector'), 'IndexParamArray', indeces);
 
             % From
             set_param(strcat(marker_i, '/From'), 'GotoTag', 'pShoulder_i_0');
@@ -151,7 +151,7 @@ if (fo_number > 0)
 
             % Selector
             indeces = {'1:3', num2str(i)};
-            set_param(marker_i, 'IndexParamArray', indeces);
+            set_param(strcat(marker_i, '/Selector'), 'IndexParamArray', indeces);
 
             % From
             set_param(strcat(marker_i, '/From'), 'GotoTag', 'pForearm_i_0');
@@ -227,7 +227,7 @@ if (ha_number > 0)
 
             % Selector
             indeces = {'1:3', num2str(i)};
-            set_param(marker_i, 'IndexParamArray', indeces);
+            set_param(strcat(marker_i, '/Selector'), 'IndexParamArray', indeces);
 
             % From
             set_param(strcat(marker_i, '/From'), 'GotoTag', 'pHand_i_0');
