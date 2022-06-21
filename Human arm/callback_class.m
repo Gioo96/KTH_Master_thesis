@@ -116,9 +116,11 @@ classdef callback_class < handle
             obj.meas_pos = [msg.Pose.Pose.Position.X msg.Pose.Pose.Position.Y msg.Pose.Pose.Position.Z];
             obj.meas_vel = [msg.Twist.Twist.Linear.X msg.Twist.Twist.Linear.Y msg.Twist.Twist.Linear.Z];
 
+            
             % C1 --> Condition satisfied at max once           
-            if (obj.meas_pos(1) > 0 && obj.count == 0)
+            if (obj.meas_pos(2) > 0 && obj.count == 0)
 
+                disp(obj.meas_pos(2))
                 obj.start = true;
             end
         end

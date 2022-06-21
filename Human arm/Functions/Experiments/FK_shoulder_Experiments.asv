@@ -36,6 +36,6 @@ RBS_M0 = Rx_M0 * Ry_x * RBS_y;
 % TRANSLATION: Marker wrt B_shoulder
 trans_M_BS = shoulder_variable;
 % ROTATION+TRANSLATION: Marker to World
-Phi_shou = [RBS_M0 RBS_M0*trans_M_BS+trans_BS_M0;0 0 0 1];
+Phi_shou = [RBS_M0 RBS_M0*trans_M_BS;0 0 0 1];
 
 end

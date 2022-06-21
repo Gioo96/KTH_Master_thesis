@@ -43,15 +43,19 @@ Rz_el = [cos(q(4)) -sin(q(4)) 0;
 % TRANSLATION: Shoulder_RF_final wrt Shoulder_RF
 trans_FS_BS = [0; -arm.shoulder.length; 0];
 % ROTATION+TRANSLATION: Shoulder_RF_final wrt M0
-TFS_M0 = [RBS_M0 RBS_M0*trans_FS_BS+trans_BS_M0;0 0 0 1];
+TW_FS = [RBS_M0 RBS_M0*trans_FS_BS+trans_BS_M0;0 0 0 1];
 % ROTATION: Elbow_RF wrt Shoulder_RF_final
 RBE_FS = Rz_el;
 
 % TRANSLATION: Marker wrt Elbow_RF
 trans_M_BE = forearm_variable;
-% ROTATION+TRANSLATION: Marker wrt Shoulder_RF_final
-TM_FS = [RBE_FS RBE_FS*trans_M_BE;0 0 0 1];
+% ROTATION+TRANSLATION: Marker to Shoulder_RF_final
+TFS_M = [RFS_BE RFS_BE * trans_BE_M;0 0 0 1];
 % ROTATION+TRANSLATION: Marker to World
-Phi_fore = TFS_M0 * TM_FS;
+Phi_fore = TW_FS * TFS_M;
+
+
+% ROTATION+TRANSLATION: Marker to M0 (I don't care about rotation)
+Phi_fore = [eye(3, 3) forearm_variable;0 0 0 1];
 
 end
