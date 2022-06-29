@@ -67,7 +67,7 @@ Phi = SX.sym('phi', [m * 3, 1]);
 % SHOULDER
 for s = 1 : size(m_shoulder_str, 2)
     
-    [T, variable] = FK_shoulder_Experiments(char(m_shoulder_str(s)));
+    [T, variable] = FK_shoulder_Experiments(char(m_shoulder_str(s)), q);
     shou_vars = [shou_vars, variable];
     Phi((s-1)*3+1 : (s-1)*3+3) = T(1:3, 4);
 end
@@ -76,7 +76,7 @@ end
 i = 1;
 for f = size(m_shoulder_str, 2)+1 : size(m_shoulder_str, 2)+size(m_forearm_str, 2)
     
-    [T, variable] = FK_forearm_Experiments(char(m_forearm_str(i)));
+    [T, variable] = FK_forearm_Experiments(char(m_forearm_str(i)), q);
     fore_vars = [fore_vars, variable];
     Phi((f-1)*3+1 : (f-1)*3+3) = T(1:3, 4);
     i = i + 1;
@@ -86,7 +86,7 @@ end
 j = 1;
 for h = size(m_shoulder_str, 2)+size(m_forearm_str, 2)+1 : size(m_shoulder_str, 2)+size(m_forearm_str, 2)+size(m_hand_str, 2)
 
-    [T, variable] = FK_hand_Experiments(char(m_hand_str(j)));
+    [T, variable] = FK_hand_Experiments(char(m_hand_str(j)), q);
     hand_vars = [hand_vars, variable];
     Phi((h-1)*3+1 : (h-1)*3+3) = T(1:3, 4);
     j = j + 1;

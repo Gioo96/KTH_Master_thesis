@@ -6,6 +6,20 @@ markers_shoulder = sh_markers;
 markers_forearm = fo_markers;
 markers_hand = ha_markers;
 
+if (size(sh_markers, 2) == 0)
+
+    markers_shoulder = -1;
+
+elseif (size(fo_markers, 2) == 0)
+
+    markers_forearm = -1;
+
+elseif (size(ha_markers, 2) == 0)
+
+    markers_hand = -1;
+    
+end
+
 % Number of markers in the shoulder, forearm, hand
 sh_number = size(sh_markers, 2);
 fo_number = size(fo_markers, 2);

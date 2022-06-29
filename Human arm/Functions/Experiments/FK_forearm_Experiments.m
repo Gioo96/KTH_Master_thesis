@@ -1,4 +1,4 @@
-function [Phi_fore, forearm_variable] = FK_forearm_Experiments(marker_variable)
+function [Phi_fore, forearm_variable] = FK_forearm_Experiments(marker_variable, q)
 
 % forearm_Phi computes the position of the marker (placed in the FOREARM) expressed wrt Wrold RF
 
@@ -26,7 +26,7 @@ Rz_sh = [cos(q(3)) -sin(q(3)) 0;
                0 0 1];
 
 % TRANSLATION: Shoulder_RF wrt M0
-trans_BS_M0 = [2;2;2]; % TO BE EVALUATED
+trans_BS_M0 = [-0.008;-0.17; -0.29]; % TO BE EVALUATED
 % ROTATION: Shoulder_RF wrt M0
 Rx_M0 = align.Rz * align.Rx * Rx_sh; % Rotation along x
 Ry_x = align.Ry * align.Rz * Ry_sh; % Rotation along y

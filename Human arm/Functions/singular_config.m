@@ -105,7 +105,7 @@ while ~markers_found
             disp(mean_rcond_max);
         end
 
-        if (num_simulations == 3)
+        if (num_simulations == 1)
         
             markers_found = true;
         end

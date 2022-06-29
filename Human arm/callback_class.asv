@@ -5,9 +5,11 @@ classdef callback_class < handle
    
         % Topic
         topic string;
-        marker_number;
         meas_pos;
         meas_vel;
+        sh_num;
+        fo_num;
+        ha_num;
         count;
         current_time;
         old_estimate_pos;
@@ -18,12 +20,14 @@ classdef callback_class < handle
         rospub;
     end
 
-    methods 
-        function obj = callback_class(marker_number)
-            obj.topic = strcat('/qualisys/Super_marker_', num2str(marker_number), '/odom');
-            obj.marker_number = marker_number;
+    methods (Access = public)
+        function obj = callback_class(name, shoulder_number, forearm_number, hand_number)
+            obj.topic = strcat('/qualisys/', num2str(name), '/odom');
             obj.meas_pos = zeros(1, 3);
             obj.meas_vel = zeros(1, 3);
+            obj.sh_num = shoulder_number;
+            obj.fo_num = forearm_number;
+            obj.ha_num = hand_number;
             obj.count = 0;
             obj.current_time = 0;
             obj.old_estimate_pos = zeros(3, 3);
@@ -45,21 +49,46 @@ classdef callback_class < handle
             ros_sub = obj.rospub;
         end
 
+        function sub_odom = simulation_tuningParameters(obj, num_simulations)
+
+            % Subscriber
+            sub_odom = rossubscriber(obj.topic, @obj.callback_tuningParameters, 'DataFormat', 'struct');
+
+            % Continue only if C1 is met
+            while ~obj.start
+            
+                %obj.meas_pos(1)
+                pause(0.01);
+            end
+
+            % Run simulations in simulink 
+            for i = 1:num_simulations
+
+                % Run simulation
+                out = sim('master_thesis_simulink.slx');
+                remove_blocks_simulink_Experiments(obj.sh_num, obj.fo_num, obj.ha_num);
+                out.tSh_0
+            end
+        
+        end
+
+        function callback_tuningParameters(obj, ~, msg)
+
+            obj.meas_pos = [msg.Pose.Pose.Position.X msg.Pose.Pose.Position.Y msg.Pose.Pose.Position.Z];
+            obj.meas_vel = [msg.Twist.Twist.Linear.X msg.Twist.Twist.Linear.Y msg.Twist.Twist.Linear.Z];
+
+            %obj.meas_pos
+            % C1 --> Condition satisfied at max once           
+            if (obj.meas_pos(1) > 0 && obj.count == 0)
+
+                obj.start = true;
+            end
+        end
+
     end
 
     %% Static methods
     methods (Static)
-
-        function obj = access_properties(marker)
-
-            persistent obj_callback;
-            if isempty(obj_callback)
-
-                obj_callback = callback_class(marker);               
-            end
-            obj = obj_callback;
-        end
-
 
         function callback(~, msg)
 
@@ -101,45 +130,12 @@ classdef callback_class < handle
             end
         end
 
-        function callback_tuningParameters(~, msg)
-
-            % # marker = {1,2,3,..}
-            persistent marker;
-            if isempty(marker)
-
-                marker = msg.ChildFrameId(14);
-            end
-
-            % Access properties
-            obj = callback_class.access_properties(marker);
-
-            obj.meas_pos = [msg.Pose.Pose.Position.X msg.Pose.Pose.Position.Y msg.Pose.Pose.Position.Z];
-            obj.meas_vel = [msg.Twist.Twist.Linear.X msg.Twist.Twist.Linear.Y msg.Twist.Twist.Linear.Z];
-
-            % C1 --> Condition satisfied at max once           
-            if (obj.meas_pos(1) > 0 && obj.count == 0)
-
-                obj.start = true;
-            end
-        end
-
-
-        function simulation_tuningParameters(marker)
-
-            persistent obj_callback;
-            if isempty(obj_callback)
-
-                obj_callback = callback_class(marker);               
-            end
-            obj = obj_callback;
-        end
-
         function simulation(marker, number_simulations, start_slx)
 
             % Access properties
             obj = callback_class.access_properties(marker);
 
-            % SUbscriber
+            % Subscriber
             rospub = rossubscriber(obj.topic, @obj.callback, 'DataFormat', 'struct');
 
             if start_slx

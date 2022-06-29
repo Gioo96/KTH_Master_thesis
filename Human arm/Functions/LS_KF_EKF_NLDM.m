@@ -539,6 +539,25 @@ switch selected
             legend(q, qls, qekf, 'Location', 'southeast', 'Interpreter', 'latex');
         end
 
+        %% Plot ||pk-Phi(qk_est)|| over time
+        fig1 = figure;
+
+        n = size(output.p_noisy_meas.signals.values, 1);
+        kf_error_ekf = zeros(n, 1);
+        kf_error_ls = zeros(n, 1);
+        for i = 1:n
+
+            kf_error_ls(i) = norm(output.p_noisy_meas.signals.values(i,:) - full(f_f_mex(output.out.signals(2).values(:, i), markers_shoulder, markers_forearm, markers_hand)));
+            kf_error_ekf(i) = norm(output.p_noisy_meas.signals.values(i,:) - full(f_f_mex(output.out.signals(4).values(i, :), markers_shoulder, markers_forearm, markers_hand)));
+        end
+        leg_ekf = strcat('$||p_k - \Phi(\hat{q_k}^{ekf})||', '$');
+        leg_ls = strcat('$||p_k - \Phi(\hat{q_k}^{ls})||', '$');
+        plot(output.p_noisy_meas.time, kf_error_ls);
+        hold on;
+        plot(output.p_noisy_meas.time, kf_error_ekf);
+        legend(leg_ls, leg_ekf, 'Location', 'southeast', 'Interpreter', 'latex');
+        title("FK error");
+
     %% KF && EKF
     case 6
 
@@ -745,6 +764,13 @@ switch selected
             stairs(output.out.time, rad2deg(squeeze(output.out.signals(4).values(i, :))'), 'LineWidth', 2);
             legend(q, qls, qkf, qekf, 'Location', 'southeast', 'Interpreter', 'latex');
         end
+
+        %% Plot ||pk-Phi(qk_est)|| over time
+        output.p_noisy_meas
+        fig1 = figure;
+        sgtitle("FK error")
+
+        %n = length(output.p_noisy_meas)
 
 end
 
