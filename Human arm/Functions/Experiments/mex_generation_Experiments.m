@@ -1,4 +1,4 @@
-function mex_generation_Experiments(links, sample_Time, generate)
+function mex_generation_Experiments(links, sample_Time, tSh_0, zero_conf, generate)
 
 % mex_generation generates the following mex functions: - Phi
 %                                                       - Jpseudo
@@ -10,6 +10,9 @@ function mex_generation_Experiments(links, sample_Time, generate)
 % Inputs:
 % -- links          : Vector containing indices {1, 2, 3} related to the corresponding marker position
 % -- sample_Time    : Sampling time
+% -- tSh_0          : Position of Shoulder wrt Super_marker_0
+% -- zero_conf      : true if tSh_0 is at 0 conf
+% -- generate       : true if mex functions need to be generated
 
 %  CasADi
 import casadi.*
@@ -67,7 +70,7 @@ Phi = SX.sym('phi', [m * 3, 1]);
 % SHOULDER
 for s = 1 : size(m_shoulder_str, 2)
     
-    [T, variable] = FK_shoulder_Experiments(char(m_shoulder_str(s)), q);
+    [T, variable] = FK_shoulder_Experiments(char(m_shoulder_str(s)), q, tSh_0);
     shou_vars = [shou_vars, variable];
     Phi((s-1)*3+1 : (s-1)*3+3) = T(1:3, 4);
 end
@@ -76,7 +79,7 @@ end
 i = 1;
 for f = size(m_shoulder_str, 2)+1 : size(m_shoulder_str, 2)+size(m_forearm_str, 2)
     
-    [T, variable] = FK_forearm_Experiments(char(m_forearm_str(i)), q);
+    [T, variable] = FK_forearm_Experiments(char(m_forearm_str(i)), q, tSh_0);
     fore_vars = [fore_vars, variable];
     Phi((f-1)*3+1 : (f-1)*3+3) = T(1:3, 4);
     i = i + 1;
@@ -86,7 +89,7 @@ end
 j = 1;
 for h = size(m_shoulder_str, 2)+size(m_forearm_str, 2)+1 : size(m_shoulder_str, 2)+size(m_forearm_str, 2)+size(m_hand_str, 2)
 
-    [T, variable] = FK_hand_Experiments(char(m_hand_str(j)), q);
+    [T, variable] = FK_hand_Experiments(char(m_hand_str(j)), q, tSh_0);
     hand_vars = [hand_vars, variable];
     Phi((h-1)*3+1 : (h-1)*3+3) = T(1:3, 4);
     j = j + 1;
@@ -155,37 +158,55 @@ switch generate
 
     case 'true'
 
-        opts = struct('main', true, 'mex', true);
-        
-        % Generate Phi
-        f_Phi_exp.generate('f_Phi_exp_mex.c', opts);
-        mex f_Phi_exp_mex.c;
+        switch zero_conf
 
-        % Generate J
-        f_J_exp.generate('f_J_exp_mex.c', opts);
-        mex f_J_exp_mex.c;
-        
-        % Generate Jpseudo
-        f_Jpseudo_exp.generate('f_Jpseudo_exp_mex.c', opts);
-        mex f_Jpseudo_exp_mex.c;
-        
-        % Generate f
-        f_f_exp.generate('f_f_exp_mex.c', opts);
-        mex f_f_exp_mex.c;
-        
-        % Generate F
-        f_F_exp.generate('f_Fekf_exp_mex.c', opts);
-        mex f_Fekf_exp_mex.c;
-        
-        % Generate G
-        f_G_exp.generate('f_Gekf_exp_mex.c', opts);
-        mex f_Gekf_exp_mex.c;
-        
-        % Generate H
-        f_J_exp.generate('f_Hekf_exp_mex.c', opts);
-        mex f_Hekf_exp_mex.c;
+            case 'true'
 
+                opts = struct('main', true, 'mex', true);
+        
+                % Generate Phi
+                f_Phi_exp.generate('f_Phi_0Conf_exp_mex.c', opts);
+                mex f_Phi_0Conf_exp_mex.c;
+            
+                % Generate J
+                f_J_exp.generate('f_J_0Conf_exp_mex.c', opts);
+                mex f_J_0Conf_exp_mex.c;
+
+            case 'false'
+
+                opts = struct('main', true, 'mex', true);
+        
+                % Generate Phi
+                f_Phi_exp.generate('f_Phi_exp_mex.c', opts);
+                mex f_Phi_exp_mex.c;
+            
+                % Generate J
+                f_J_exp.generate('f_J_exp_mex.c', opts);
+                mex f_J_exp_mex.c;
+                
+                % Generate Jpseudo
+                f_Jpseudo_exp.generate('f_Jpseudo_exp_mex.c', opts);
+                mex f_Jpseudo_exp_mex.c;
+                
+                % Generate f
+                f_f_exp.generate('f_f_exp_mex.c', opts);
+                mex f_f_exp_mex.c;
+                
+                % Generate F
+                f_F_exp.generate('f_Fekf_exp_mex.c', opts);
+                mex f_Fekf_exp_mex.c;
+                
+                % Generate G
+                f_G_exp.generate('f_Gekf_exp_mex.c', opts);
+                mex f_Gekf_exp_mex.c;
+                
+                % Generate H
+                f_J_exp.generate('f_Hekf_exp_mex.c', opts);
+                mex f_Hekf_exp_mex.c;
+              
+        end
 end
+
 %% Rechange directory
 cd ../..;
 end

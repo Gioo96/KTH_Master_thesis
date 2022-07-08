@@ -1,4 +1,4 @@
-function [Phi_fore, forearm_variable] = FK_forearm_Experiments(marker_variable, q)
+function [Phi_fore, forearm_variable] = FK_forearm_Experiments(marker_variable, q, tSh_0)
 
 % forearm_Phi computes the position of the marker (placed in the FOREARM) expressed wrt Wrold RF
 
@@ -10,6 +10,18 @@ import casadi.*
 
 % Position of marker placed in the FOREARM wrt M0
 forearm_variable = SX.sym(marker_variable, [3, 1]);
+
+% Align Reference frames
+
+align.Rx = [1 0 0;
+            0 0 -1;
+            0 1 0];
+align.Ry = [0 0 1;
+            0 1 0;
+            -1 0 0];
+align.Rz = [0 -1 0;
+            1 0 0;
+            0 0 1];
 
 %
 % SHOULDER
@@ -26,7 +38,7 @@ Rz_sh = [cos(q(3)) -sin(q(3)) 0;
                0 0 1];
 
 % TRANSLATION: Shoulder_RF wrt M0
-trans_BS_M0 = [-0.008;-0.17; -0.29]; % TO BE EVALUATED
+trans_BS_M0 = tSh_0;
 % ROTATION: Shoulder_RF wrt M0
 Rx_M0 = align.Rz * align.Rx * Rx_sh; % Rotation along x
 Ry_x = align.Ry * align.Rz * Ry_sh; % Rotation along y

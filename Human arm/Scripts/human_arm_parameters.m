@@ -11,13 +11,13 @@ m = shoulder_num + forearm_num + hand_num;
 
 % Shoulder
 arm.shoulder.length = 0.28; % [m]
-arm.shoulder.radius = 0.04; % [m]
+arm.shoulder.radius = 0.05; % [m]
 arm.shoulder.mass = 2.4459; % [Kg]
 arm.shoulder.moment_inertia = [0.0059341, 0.0010123, 0.0059341]; % [Kg*m^2]
 
 % Forearm
 arm.forearm.length = 0.26; % [m]
-arm.forearm.radius = 0.02; % [m]
+arm.forearm.radius = 0.03; % [m]
 arm.forearm.mass = 1.578; % [Kg]
 arm.forearm.moment_inertia = [0.0089856, 0.00041027, 0.0089856]; % [Kg*m^2]
 
@@ -43,62 +43,6 @@ global kf;
 global ekf;
 global f_J f_f f_Phi f_F;
 global markers_shoulder markers_forearm markers_hand;
-
-% % Shoulder
-% arm.shoulder.length = 0.47828; % [m]
-% arm.shoulder.radius = 0.02877; % [m]
-% arm.shoulder.mass = 2.4459; % [Kg]
-% arm.shoulder.moment_inertia = [0.0059341, 0.0010123, 0.0059341]; % [Kg*m^2]
-% 
-% % Forearm
-% arm.forearm.length = 0.2584; % [m]
-% arm.forearm.radius = 0.022803; % [m]
-% arm.forearm.mass = 1.578; % [Kg]
-% arm.forearm.moment_inertia = [0.0089856, 0.00041027, 0.0089856]; % [Kg*m^2]
-% 
-% % Hand
-% arm.hand.dimensions = [0.12916, 0.19374, 0.045607]; % [m]
-% arm.hand.mass = 0.4734; % [Kg]
-% arm.hand.moment_inertia = [0.0015629, 0.0007401900000000001, 0.0021389]; % [Kg*m^2]
-
-%% S4_F3_H2
-% % Shoulder
-% marker.shoulder_variables = [arm.shoulder.radius+arm.markers.radius -3/4*arm.shoulder.length 0;
-%                    -arm.shoulder.radius-arm.markers.radius -3/4*arm.shoulder.length 0;
-%                    arm.shoulder.radius+arm.markers.radius -1/4*arm.shoulder.length 0;
-%                    -arm.shoulder.radius-arm.markers.radius -1/4*arm.shoulder.length 0]';
-% 
-% % Forearm
-% marker.forearm_variables = [arm.forearm.radius+arm.markers.radius -3/4*arm.forearm.length 0;
-%                    -arm.forearm.radius-arm.markers.radius -1/2*arm.forearm.length 0;
-%                    arm.forearm.radius+arm.markers.radius -1/4*arm.forearm.length 0]';
-% 
-% % Hand
-% marker.hand_variables = [0 -3/4*arm.hand.dimensions(2) arm.hand.dimensions(3)/2+arm.markers.radius;
-%                    0 -1/4*arm.hand.dimensions(2) arm.hand.dimensions(3)/2+arm.markers.radius]';
-
-%% S1_F0_H3
-% % Shoulder
-% marker.shoulder_variables = [arm.shoulder.radius+arm.markers.radius -1/4*arm.shoulder.length 0]';
-% 
-% % Forearm
-% marker.forearm_variables = -1;
-% 
-% % Hand
-% marker.hand_variables = [-3/7*arm.hand.dimensions(1) -1/4*arm.hand.dimensions(2) +arm.hand.dimensions(3)/2+arm.markers.radius;
-%                          0 -3/4*arm.hand.dimensions(2) arm.hand.dimensions(3)/2+arm.markers.radius;
-%                          3/7*arm.hand.dimensions(1) -1/2*arm.hand.dimensions(2) -arm.hand.dimensions(3)/2-arm.markers.radius;]';
-
-%% S1_F0_H2
-% Shoulder
-% marker.shoulder_variables = [arm.shoulder.radius+arm.markers.radius -1/4*arm.shoulder.length 0]';
-% 
-% % Forearm
-% marker.forearm_variables = -1;
-% 
-% % Hand
-% marker.hand_variables = [-3/7*arm.hand.dimensions(1) -1/4*arm.hand.dimensions(2) +arm.hand.dimensions(3)/2+arm.markers.radius;
-%                          0 -3/4*arm.hand.dimensions(2) -arm.hand.dimensions(3)/2-arm.markers.radius]';
 
 %% Align Reference frames
 

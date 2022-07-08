@@ -73,7 +73,7 @@ classdef callback_class < handle
             obj.meas_vel = [msg.Twist.Twist.Linear.X msg.Twist.Twist.Linear.Y msg.Twist.Twist.Linear.Z];
 
             % C1 --> Condition satisfied at max once           
-            if (obj.meas_pos(1) < 0 && obj.count == 0)
+            if (obj.count == 0)
 
                 obj.start = true;
             end
@@ -154,7 +154,7 @@ classdef callback_class < handle
                 
                 while i <= number_simulations
                 
-                    % Markers' POSITION
+                   % Markers' POSITION
                    fig_1 = figure(1);
                    set(fig_1, 'position', [10, 10, 1500, 500]);
                    sgtitle('Marker Position');

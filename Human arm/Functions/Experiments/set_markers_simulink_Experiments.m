@@ -7,15 +7,15 @@ count = 0;
 if (sh_number > 0)
 
     % Add Markers block
-    Markers = add_block('master_thesis_simulink/Experiments/Human arm/Markers', 'master_thesis_simulink/Experiments/Human arm/RightShoulder/Markers', 'MakeNameUnique', 'on');
+    Markers = add_block('master_thesis_simulink/Experiments/Model validation/Human arm/Markers', 'master_thesis_simulink/Experiments/Model validation/Human arm/RightShoulder/Markers', 'MakeNameUnique', 'on');
     set_param(Markers, 'commented', 'off');
     set_param(Markers, 'Position', [-180 265 -90 385]);
-    W_out = get_param('master_thesis_simulink/Experiments/Human arm/RightShoulder/W', 'PortHandles').RConn;
+    W_out = get_param('master_thesis_simulink/Experiments/Model validation/Human arm/RightShoulder/W', 'PortHandles').RConn;
     M_in1 = get_param(Markers, 'PortHandles').LConn(1);
-    add_line('master_thesis_simulink/Experiments/Human arm/RightShoulder', W_out, M_in1, 'autorouting', 'on');
+    add_line('master_thesis_simulink/Experiments/Model validation/Human arm/RightShoulder', W_out, M_in1, 'autorouting', 'on');
 
     % Inside Markers --> create more markers
-    path = 'master_thesis_simulink/Experiments/Human arm/RightShoulder/Markers';
+    path = 'master_thesis_simulink/Experiments/Model validation/Human arm/RightShoulder/Markers';
     current_position = get_param(strcat(path, '/M1'), 'Position');
     count = count + 1;
     pi_name = strcat('p_', num2str(count));
@@ -32,8 +32,8 @@ if (sh_number > 0)
     indeces = {'1:3', '1'};
     set_param(strcat(path, '/M1/Selector'), 'IndexParamArray', indeces);
 
-    % From
-    set_param(strcat(path, '/M1/From'), 'GotoTag', 'pShoulder_i_0');
+    % Variable
+    set_param(strcat(path, '/M1/Variable'), 'Value', 'markers_shoulder');
 
     if (sh_number > 1)
 
@@ -54,20 +54,20 @@ if (sh_number > 0)
 
             % Add connections and output outside M2,... blocks
             pi = add_block(strcat(path, '/p_1'), strcat(path, '/p_1'), 'MakeNameUnique', 'on');
-            pi_out = get_param('master_thesis_simulink/Experiments/Human arm/RightShoulder/Markers/M2', 'PortHandles').LConn(1);
+            pi_out = get_param('master_thesis_simulink/Experiments/Model validation/Human arm/RightShoulder/Markers/M2', 'PortHandles').LConn(1);
             pi_in = get_param(pi, 'PortHandles').Inport;
             set_param(pi, 'Position', current_position_pi + [0 80 0 80]);
             current_position_pi = get_param(pi, 'Position');
-            add_line('master_thesis_simulink/Experiments/Human arm/RightShoulder/Markers', get_param(Mi, 'PortHandles').Outport(1), pi_in, 'autorouting', 'on');
+            add_line('master_thesis_simulink/Experiments/Model validation/Human arm/RightShoulder/Markers', get_param(Mi, 'PortHandles').Outport(1), pi_in, 'autorouting', 'on');
             pi_name = strcat('p_', num2str(count));
             set_param(pi, 'GotoTag', pi_name);
 
             pdoti = add_block(strcat(path, '/pdot_1'), strcat(path, '/pdot_1'), 'MakeNameUnique', 'on');
-            pdoti_out = get_param('master_thesis_simulink/Experiments/Human arm/RightShoulder/Markers/M2', 'PortHandles').LConn(2);
+            pdoti_out = get_param('master_thesis_simulink/Experiments/Model validation/Human arm/RightShoulder/Markers/M2', 'PortHandles').LConn(2);
             pdoti_in = get_param(pdoti, 'PortHandles').Inport;
             set_param(pdoti, 'Position', current_position_pdoti + [0 80 0 80]);
             current_position_pdoti = get_param(pdoti, 'Position');
-            add_line('master_thesis_simulink/Experiments/Human arm/RightShoulder/Markers', get_param(Mi, 'PortHandles').Outport(2), pdoti_in, 'autorouting', 'on');
+            add_line('master_thesis_simulink/Experiments/Model validation/Human arm/RightShoulder/Markers', get_param(Mi, 'PortHandles').Outport(2), pdoti_in, 'autorouting', 'on');
             pdoti_name = strcat('pdot_', num2str(count));
             set_param(pdoti, 'GotoTag', pdoti_name);
             set_param(pdoti, 'Name', pdoti_name);
@@ -77,7 +77,7 @@ if (sh_number > 0)
             set_param(strcat(marker_i, '/Selector'), 'IndexParamArray', indeces);
 
             % From
-            set_param(strcat(marker_i, '/From'), 'GotoTag', 'pShoulder_i_0');
+            set_param(strcat(marker_i, '/Variable'), 'Value', 'markers_shoulder');
         end
     end
 end
@@ -85,15 +85,15 @@ end
 if (fo_number > 0)
 
     % Add Markers block
-    Markers = add_block('master_thesis_simulink/Experiments/Human arm/Markers', 'master_thesis_simulink/Experiments/Human arm/RightForeArm/Markers', 'MakeNameUnique', 'on');
+    Markers = add_block('master_thesis_simulink/Experiments/Model validation/Human arm/Markers', 'master_thesis_simulink/Experiments/Model validation/Human arm/RightForeArm/Markers', 'MakeNameUnique', 'on');
     set_param(Markers, 'commented', 'off');
     set_param(Markers, 'Position', [-180 265 -90 385]);
-    W_out = get_param('master_thesis_simulink/Experiments/Human arm/RightForeArm/W', 'PortHandles').RConn;
+    W_out = get_param('master_thesis_simulink/Experiments/Model validation/Human arm/RightForeArm/W', 'PortHandles').RConn;
     M_in1 = get_param(Markers, 'PortHandles').LConn(1);
-    add_line('master_thesis_simulink/Experiments/Human arm/RightForeArm', W_out, M_in1, 'autorouting', 'on');
+    add_line('master_thesis_simulink/Experiments/Model validation/Human arm/RightForeArm', W_out, M_in1, 'autorouting', 'on');
 
     % Inside Markers --> create more markers
-    path = 'master_thesis_simulink/Experiments/Human arm/RightForeArm/Markers';
+    path = 'master_thesis_simulink/Experiments/Model validation/Human arm/RightForeArm/Markers';
     current_position = get_param(strcat(path, '/M1'), 'Position');
     count = count + 1;
     pi_name = strcat('p_', num2str(count));
@@ -111,7 +111,7 @@ if (fo_number > 0)
     set_param(strcat(path, '/M1/Selector'), 'IndexParamArray', indeces);
 
     % From
-    set_param(strcat(path, '/M1/From'), 'GotoTag', 'pForearm_i_0');
+    set_param(strcat(path, '/M1/Variable'), 'Value', 'markers_forearm');
 
     if (fo_number > 1)
 
@@ -132,20 +132,20 @@ if (fo_number > 0)
 
             % Add connections and output outside M2,... blocks
             pi = add_block(strcat(path, '/p_1'), strcat(path, '/p_1'), 'MakeNameUnique', 'on');
-            pi_out = get_param('master_thesis_simulink/Experiments/Human arm/RightForeArm/Markers/M2', 'PortHandles').LConn(1);
+            pi_out = get_param('master_thesis_simulink/Experiments/Model validation/Human arm/RightForeArm/Markers/M2', 'PortHandles').LConn(1);
             pi_in = get_param(pi, 'PortHandles').Inport;
             set_param(pi, 'Position', current_position_pi + [0 80 0 80]);
             current_position_pi = get_param(pi, 'Position');
-            add_line('master_thesis_simulink/Experiments/Human arm/RightForeArm/Markers', get_param(Mi, 'PortHandles').Outport(1), pi_in, 'autorouting', 'on');
+            add_line('master_thesis_simulink/Experiments/Model validation/Human arm/RightForeArm/Markers', get_param(Mi, 'PortHandles').Outport(1), pi_in, 'autorouting', 'on');
             pi_name = strcat('p_', num2str(count));
             set_param(pi, 'GotoTag', pi_name);
 
             pdoti = add_block(strcat(path, '/pdot_1'), strcat(path, '/pdot_1'), 'MakeNameUnique', 'on');
-            pdoti_out = get_param('master_thesis_simulink/Experiments/Human arm/RightForeArm/Markers/M2', 'PortHandles').LConn(2);
+            pdoti_out = get_param('master_thesis_simulink/Experiments/Model validation/Human arm/RightForeArm/Markers/M2', 'PortHandles').LConn(2);
             pdoti_in = get_param(pdoti, 'PortHandles').Inport;
             set_param(pdoti, 'Position', current_position_pdoti + [0 80 0 80]);
             current_position_pdoti = get_param(pdoti, 'Position');
-            add_line('master_thesis_simulink/Experiments/Human arm/RightForeArm/Markers', get_param(Mi, 'PortHandles').Outport(2), pdoti_in, 'autorouting', 'on');
+            add_line('master_thesis_simulink/Experiments/Model validation/Human arm/RightForeArm/Markers', get_param(Mi, 'PortHandles').Outport(2), pdoti_in, 'autorouting', 'on');
             pdoti_name = strcat('pdot_', num2str(count));
             set_param(pdoti, 'GotoTag', pdoti_name);
 
@@ -154,7 +154,7 @@ if (fo_number > 0)
             set_param(strcat(marker_i, '/Selector'), 'IndexParamArray', indeces);
 
             % From
-            set_param(strcat(marker_i, '/From'), 'GotoTag', 'pForearm_i_0');
+            set_param(strcat(marker_i, '/Variable'), 'Value', 'markers_forearm');
         end
     end
 end
@@ -162,15 +162,15 @@ end
 if (ha_number > 0)
     
     % Add Markers block
-    Markers = add_block('master_thesis_simulink/Experiments/Human arm/Markers', 'master_thesis_simulink/Experiments/Human arm/RightHand/Markers', 'MakeNameUnique', 'on');
+    Markers = add_block('master_thesis_simulink/Experiments/Model validation/Human arm/Markers', 'master_thesis_simulink/Experiments/Model validation/Human arm/RightHand/Markers', 'MakeNameUnique', 'on');
     set_param(Markers, 'commented', 'off');
     set_param(Markers, 'Position', [-180 265 -90 385]);
-    W_out = get_param('master_thesis_simulink/Experiments/Human arm/RightHand/W', 'PortHandles').RConn;
+    W_out = get_param('master_thesis_simulink/Experiments/Model validation/Human arm/RightHand/W', 'PortHandles').RConn;
     M_in1 = get_param(Markers, 'PortHandles').LConn(1);
-    add_line('master_thesis_simulink/Experiments/Human arm/RightHand', W_out, M_in1, 'autorouting', 'on');
+    add_line('master_thesis_simulink/Experiments/Model validation/Human arm/RightHand', W_out, M_in1, 'autorouting', 'on');
     
     % Inside Markers --> create more markers
-    path = 'master_thesis_simulink/Experiments/Human arm/RightHand/Markers';
+    path = 'master_thesis_simulink/Experiments/Model validation/Human arm/RightHand/Markers';
     current_position = get_param(strcat(path, '/M1'), 'Position');
     count = count + 1;
     pi_name = strcat('p_', num2str(count));
@@ -188,7 +188,7 @@ if (ha_number > 0)
     set_param(strcat(path, '/M1/Selector'), 'IndexParamArray', indeces);
 
     % From
-    set_param(strcat(path, '/M1/From'), 'GotoTag', 'pHand_i_0');
+    set_param(strcat(path, '/M1/Variable'), 'Value', 'markers_hand');
 
     if (ha_number > 1)
 
@@ -208,11 +208,11 @@ if (ha_number > 0)
 
             % Add connections and output outside M2,... blocks
             pi = add_block(strcat(path, '/p_1'), strcat(path, '/p_1'), 'MakeNameUnique', 'on');
-            pi_out = get_param('master_thesis_simulink/Experiments/Human arm/RightHand/Markers/M2', 'PortHandles').LConn(1);
+            pi_out = get_param('master_thesis_simulink/Experiments/Model validation/Human arm/RightHand/Markers/M2', 'PortHandles').LConn(1);
             pi_in = get_param(pi, 'PortHandles').Inport;
             set_param(pi, 'Position', current_position_pi + [0 80 0 80]);
             current_position_pi = get_param(pi, 'Position');
-            add_line('master_thesis_simulink/Experiments/Human arm/RightHand/Markers', get_param(Mi, 'PortHandles').Outport(1), pi_in, 'autorouting', 'on');
+            add_line('master_thesis_simulink/Experiments/Model validation/Human arm/RightHand/Markers', get_param(Mi, 'PortHandles').Outport(1), pi_in, 'autorouting', 'on');
             pi_name = strcat('p_', num2str(count));
             set_param(pi, 'GotoTag', pi_name);
 
@@ -221,7 +221,7 @@ if (ha_number > 0)
             pdoti_in = get_param(pdoti, 'PortHandles').Inport;
             set_param(pdoti, 'Position', current_position_pdoti + [0 80 0 80]);
             current_position_pdoti = get_param(pdoti, 'Position');
-            add_line('master_thesis_simulink/Experiments/Human arm/RightHand/Markers', get_param(Mi, 'PortHandles').Outport(2), pdoti_in, 'autorouting', 'on');
+            add_line('master_thesis_simulink/Experiments/Model validation/Human arm/RightHand/Markers', get_param(Mi, 'PortHandles').Outport(2), pdoti_in, 'autorouting', 'on');
             pdoti_name = strcat('pdot_', num2str(count));
             set_param(pdoti, 'GotoTag', pdoti_name);
 
@@ -230,27 +230,27 @@ if (ha_number > 0)
             set_param(strcat(marker_i, '/Selector'), 'IndexParamArray', indeces);
 
             % From
-            set_param(strcat(marker_i, '/From'), 'GotoTag', 'pHand_i_0');
+            set_param(strcat(marker_i, '/Variable'), 'Value', 'markers_hand');
             
        end
    end
 end
-
+disp('aaaaaa')
 % Mux, Mux1
-curr_pos_Mux = get_param('master_thesis_simulink/Experiments/Human arm/Mux', 'Position') - [120 40 80 310];
-curr_pos_Mux1 = get_param('master_thesis_simulink/Experiments/Human arm/Mux1', 'Position') - [120 40 80 310];
-set_param('master_thesis_simulink/Experiments/Human arm/Mux', 'Inputs', 'm');
-set_param('master_thesis_simulink/Experiments/Human arm/Mux1', 'Inputs', 'm');
+curr_pos_Mux = get_param('master_thesis_simulink/Experiments/Model validation/Human arm/Mux', 'Position') - [120 40 80 310];
+curr_pos_Mux1 = get_param('master_thesis_simulink/Experiments/Model validation/Human arm/Mux1', 'Position') - [120 40 80 310];
+set_param('master_thesis_simulink/Experiments/Model validation/Human arm/Mux', 'Inputs', 'm');
+set_param('master_thesis_simulink/Experiments/Model validation/Human arm/Mux1', 'Inputs', 'm');
 for i = 1 : count
     
-    p_from = add_block('simulink/Signal Routing/From', strcat('master_thesis_simulink/Experiments/Human arm/p_', num2str(i)), 'MakeNameUnique', 'on');
+    p_from = add_block('simulink/Signal Routing/From', strcat('master_thesis_simulink/Experiments/Model validation/Human arm/p_', num2str(i)), 'MakeNameUnique', 'on');
     set_param(p_from, 'GotoTag', strcat('p_', num2str(i)));
-    mux_in_i = get_param('master_thesis_simulink/Experiments/Human arm/Mux', 'PortHandles').Inport(i);
+    mux_in_i = get_param('master_thesis_simulink/Experiments/Model validation/Human arm/Mux', 'PortHandles').Inport(i);
     p_out_i = get_param(p_from, 'PortHandles').Outport;
 
-    pdot_from = add_block('simulink/Signal Routing/From', strcat('master_thesis_simulink/Experiments/Human arm/pdot_', num2str(i)), 'MakeNameUnique', 'on');
+    pdot_from = add_block('simulink/Signal Routing/From', strcat('master_thesis_simulink/Experiments/Model validation/Human arm/pdot_', num2str(i)), 'MakeNameUnique', 'on');
     set_param(pdot_from, 'GotoTag', strcat('pdot_', num2str(i)));
-    mux1_in_i = get_param('master_thesis_simulink/Experiments/Human arm/Mux1', 'PortHandles').Inport(i);
+    mux1_in_i = get_param('master_thesis_simulink/Experiments/Model validation/Human arm/Mux1', 'PortHandles').Inport(i);
     pdot_out_i = get_param(pdot_from, 'PortHandles').Outport;
     if i == 1
     
@@ -258,11 +258,11 @@ for i = 1 : count
         set_param(pdot_from, 'Position', curr_pos_Mux1);
     end
     set_param(p_from, 'Position', curr_pos_Mux + [0 70 0 70]);
-    add_line('master_thesis_simulink/Experiments/Human arm/', p_out_i, mux_in_i, 'autorouting', 'on');
+    add_line('master_thesis_simulink/Experiments/Model validation/Human arm/', p_out_i, mux_in_i, 'autorouting', 'on');
     curr_pos_Mux = get_param(p_from, 'Position');
 
     set_param(pdot_from, 'Position', curr_pos_Mux1 + [0 70 0 70]);
-    add_line('master_thesis_simulink/Experiments/Human arm/', pdot_out_i, mux1_in_i, 'autorouting', 'on');
+    add_line('master_thesis_simulink/Experiments/Model validation/Human arm/', pdot_out_i, mux1_in_i, 'autorouting', 'on');
     curr_pos_Mux1 = get_param(pdot_from, 'Position');
 end
 end
