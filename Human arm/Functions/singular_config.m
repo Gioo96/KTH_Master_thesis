@@ -10,6 +10,9 @@ run('human_arm_parameters.m');
 C_code_folder = strcat('S', num2str(sh_number), '_F', num2str(fo_number), '_H', num2str(ha_number));
 
 % Comment LS, EKF, KF
+set_param('master_thesis_simulink/System', 'commented', 'off');
+set_param('master_thesis_simulink/Ros2Matlab', 'commented', 'on');
+set_param('master_thesis_simulink/Experiments', 'commented', 'on');
 set_param('master_thesis_simulink/System/LS', 'commented', 'on');
 set_param('master_thesis_simulink/System/KF vs OBS', 'commented', 'on');
 set_param('master_thesis_simulink/System/EKF', 'commented', 'on');

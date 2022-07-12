@@ -11,7 +11,7 @@ function LS_KF_EKF_NLDM(method_flag, simModel_flag, N_samples, C_code_folder)
 %                        : 'EKF'  --> Extended Kalman Filter is selected
 %                        : 'NLDM' --> Non Linear Discrete Model is selected
 % -- simModel_flag       : 'free'         --> free fall motion is simulated
-%                        : 'precompiuted' --> precompiuted trajectory is simulated
+%                        : 'precomputed' --> precompiuted trajectory is simulated
 % -- markers             : []                   -->  No Markers are needed here
 %                        : [markers variables]  -->  KF
 % -- kf_ekf              : Struct containing Kalman Filter or Extended Kalman Filter parameters such as : -- Initial states estimate 
@@ -86,6 +86,7 @@ switch simModel_flag
     
     case 'precomputed'
 
+        disp('aaaa')
         % Joints' trajectory
         % q1
         set_param('master_thesis_simulink/System/Human arm/RightShoulder_joint/jRightShoulder_rotx', 'TorqueActuationMode', 'ComputedTorque', 'MotionActuationMode', 'InputMotion');
@@ -775,5 +776,5 @@ switch selected
 end
 
 % Remobe blocks simulink
-remove_blocks_simulink(size(markers_shoulder, 2), size(markers_forearm, 2), size(markers_hand, 2));
+%remove_blocks_simulink(size(markers_shoulder, 2), size(markers_forearm, 2), size(markers_hand, 2));
 end

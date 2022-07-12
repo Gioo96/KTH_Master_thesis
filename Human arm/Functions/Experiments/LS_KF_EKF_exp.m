@@ -10,6 +10,8 @@ function output = LS_KF_EKF_exp(method_flag, directory)
 
 
 % Uncomment Experiments, Ros2Matlab
+set_param('master_thesis_simulink/Ros2Matlab/', 'commented', 'off');
+set_param('master_thesis_simulink/Experiments/', 'commented', 'off');
 set_param(strcat('master_thesis_simulink/Experiments/', directory), 'commented', 'off');
 set_param(strcat('master_thesis_simulink/Experiments/', directory, '/Experiments'), 'commented', 'off');
 set_param(strcat('master_thesis_simulink/Experiments/', directory, '/Model validation'), 'commented', 'on');
@@ -286,17 +288,17 @@ switch selected
             title_name_z = strcat('$M', num2str(i), '_{z}^0$');
             
             subplot(m, 3, (i-1)*3+1);
-            plot(output.p_0.time, output.p_0.signals.values((i-1)*3+1, :));
+            plot(output.p_0p.time, output.p_0p.signals.values((i-1)*3+1, :));
             title(title_name_x, Interpreter = "latex");
             xlabel('Time [s]');
             ylabel('Position [m]');
             subplot(m, 3, (i-1)*3+2);
-            plot(output.p_0.time, output.p_0.signals.values((i-1)*3+2, :));
+            plot(output.p_0p.time, output.p_0p.signals.values((i-1)*3+2, :));
             title(title_name_y, Interpreter = "latex");
             xlabel('Time [s]');
             ylabel('Position [m]');
             subplot(m, 3, (i-1)*3+3);
-            plot(output.p_0.time, output.p_0.signals.values((i-1)*3+3, :));
+            plot(output.p_0p.time, output.p_0p.signals.values((i-1)*3+3, :));
             title(title_name_z, Interpreter = "latex");
             xlabel('Time [s]');
             ylabel('Position [m]');
@@ -313,17 +315,17 @@ switch selected
             title_name_z = strcat('$\dot{M', num2str(i), '}_{z}^0$');
             
             subplot(m, 3, (i-1)*3+1);
-            plot(output.v_0.time, output.v_0.signals.values((i-1)*3+1, :));
+            plot(output.v_0p.time, output.v_0p.signals.values((i-1)*3+1, :));
             title(title_name_x, Interpreter = "latex");
             xlabel('Time [s]');
             ylabel('Velocity [m/s]');
             subplot(m, 3, (i-1)*3+2);
-            plot(output.v_0.time, output.v_0.signals.values((i-1)*3+2, :));
+            plot(output.v_0p.time, output.v_0p.signals.values((i-1)*3+2, :));
             title(title_name_y, Interpreter = "latex");
             xlabel('Time [s]');
             ylabel('Velocity [m/s]');
             subplot(m, 3, (i-1)*3+3);
-            plot(output.v_0.time, output.v_0.signals.values((i-1)*3+3, :));
+            plot(output.v_0p.time, output.v_0p.signals.values((i-1)*3+3, :));
             title(title_name_z, Interpreter = "latex");
             xlabel('Time [s]');
             ylabel('Velocity [m/s]');

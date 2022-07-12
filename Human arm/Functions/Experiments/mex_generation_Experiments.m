@@ -172,6 +172,26 @@ switch generate
                 f_J_exp.generate('f_J_0Conf_exp_mex.c', opts);
                 mex f_J_0Conf_exp_mex.c;
 
+                % Generate Jpseudo
+                f_Jpseudo_exp.generate('f_Jpseudo_0Conf_exp_mex.c', opts);
+                mex f_Jpseudo_0Conf_exp_mex.c;
+                
+                % Generate f
+                f_f_exp.generate('f_f_0Conf_exp_mex.c', opts);
+                mex f_f_0Conf_exp_mex.c;
+                
+                % Generate F
+                f_F_exp.generate('f_Fekf_0Conf_exp_mex.c', opts);
+                mex f_Fekf_0Conf_exp_mex.c;
+                
+                % Generate G
+                f_G_exp.generate('f_Gekf_0Conf_exp_mex.c', opts);
+                mex f_Gekf_0Conf_exp_mex.c;
+                
+                % Generate H
+                f_J_exp.generate('f_Hekf_0Conf_exp_mex.c', opts);
+                mex f_Hekf_0Conf_exp_mex.c;
+
             case 'false'
 
                 opts = struct('main', true, 'mex', true);

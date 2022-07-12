@@ -10,13 +10,13 @@ hand_num = 2;
 m = shoulder_num + forearm_num + hand_num;
 
 % Shoulder
-arm.shoulder.length = 0.28; % [m]
+arm.shoulder.length = 0.25; % [m]
 arm.shoulder.radius = 0.05; % [m]
 arm.shoulder.mass = 2.4459; % [Kg]
 arm.shoulder.moment_inertia = [0.0059341, 0.0010123, 0.0059341]; % [Kg*m^2]
 
 % Forearm
-arm.forearm.length = 0.26; % [m]
+arm.forearm.length = 0.25; % [m]
 arm.forearm.radius = 0.03; % [m]
 arm.forearm.mass = 1.578; % [Kg]
 arm.forearm.moment_inertia = [0.0089856, 0.00041027, 0.0089856]; % [Kg*m^2]
