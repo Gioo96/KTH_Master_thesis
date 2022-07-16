@@ -4,8 +4,8 @@
 n = 7;
 
 % CHANGE HERE NUMBER OF MARKERS
-shoulder_num = 1;
-forearm_num = 1;
+shoulder_num = 2;
+forearm_num = 0;
 hand_num = 2;
 m = shoulder_num + forearm_num + hand_num;
 

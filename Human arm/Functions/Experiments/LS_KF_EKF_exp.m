@@ -9,14 +9,47 @@ function output = LS_KF_EKF_exp(method_flag, directory)
 %                        : 'EKF'  --> Extended Kalman Filter is selected
 
 
-% Uncomment Experiments, Ros2Matlab
-set_param('master_thesis_simulink/Ros2Matlab/', 'commented', 'off');
-set_param('master_thesis_simulink/Experiments/', 'commented', 'off');
+%% Comment / Uncomment blocks in Simulink
+% Uncomment Ros2Matlab, Experiments
+% Ros2Matlab
+set_param('master_thesis_simulink/Ros2Matlab', 'commented', 'off');
+set_param(strcat('master_thesis_simulink/Ros2Matlab/', directory), 'commented', 'off');
+all_Subsystem_Ros2Matlab = find_system('master_thesis_simulink/Ros2Matlab', 'SearchDepth', '1');
+all_Subsystem_Ros2Matlab_num = length(all_Subsystem_Ros2Matlab);
+for i = 1:all_Subsystem_Ros2Matlab_num
+
+    subsystem = all_Subsystem_Ros2Matlab(i);
+    subsystem_name = subsystem{1};
+    if (length(subsystem_name) > 34)
+        if (strcmp(subsystem_name(35:42), directory) ~= 1)
+    
+            set_param(strcat('master_thesis_simulink/Ros2Matlab/', subsystem_name(35:42)), 'commented', 'on');
+        end
+    end
+end
+
+% Experiments
+set_param('master_thesis_simulink/Experiments', 'commented', 'off');
 set_param(strcat('master_thesis_simulink/Experiments/', directory), 'commented', 'off');
+all_Subsystem_Experiments = find_system('master_thesis_simulink/Experiments', 'SearchDepth', '1');
+all_Subsystem_Experiments_num = length(all_Subsystem_Experiments);
+for i = 1:all_Subsystem_Experiments_num
+
+    subsystem = all_Subsystem_Experiments(i);
+    subsystem_name = subsystem{1};
+    if (length(subsystem_name) > 35)
+        if (strcmp(subsystem_name(36:43), directory) ~= 1)
+    
+            set_param(strcat('master_thesis_simulink/Experiments/', subsystem_name(36:43)), 'commented', 'on');
+        end
+    end
+end
 set_param(strcat('master_thesis_simulink/Experiments/', directory, '/Experiments'), 'commented', 'off');
 set_param(strcat('master_thesis_simulink/Experiments/', directory, '/Model validation'), 'commented', 'on');
 set_param(strcat('master_thesis_simulink/Experiments/', directory, '/Noise estimation'), 'commented', 'on');
-set_param(strcat('master_thesis_simulink/Ros2Matlab/', directory), 'commented', 'off');
+
+% Comment System
+set_param('master_thesis_simulink/System', 'commented', 'on');
 
 % Comment System
 set_param('master_thesis_simulink/System', 'commented', 'on');

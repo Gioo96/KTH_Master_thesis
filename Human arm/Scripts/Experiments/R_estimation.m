@@ -2,17 +2,47 @@
 run('human_arm_parameters_exp.m')
 
 %% Simulink time
-simulink.time = 20;
+simulink.time = 2;
 
 %% Comment / Uncomment blocks in Simulink
 % Uncomment Ros2Matlab, Experiments
+% Ros2Matlab
 set_param('master_thesis_simulink/Ros2Matlab', 'commented', 'off');
-set_param('master_thesis_simulink/Experiments', 'commented', 'off');
 set_param(strcat('master_thesis_simulink/Ros2Matlab/', directory), 'commented', 'off');
+all_Subsystem_Ros2Matlab = find_system('master_thesis_simulink/Ros2Matlab', 'SearchDepth', '1');
+all_Subsystem_Ros2Matlab_num = length(all_Subsystem_Ros2Matlab);
+for i = 1:all_Subsystem_Ros2Matlab_num
+
+    subsystem = all_Subsystem_Ros2Matlab(i);
+    subsystem_name = subsystem{1};
+    if (length(subsystem_name) > 34)
+        if (strcmp(subsystem_name(35:42), directory) ~= 1)
+    
+            set_param(strcat('master_thesis_simulink/Ros2Matlab/', subsystem_name(35:42)), 'commented', 'on');
+        end
+    end
+end
+
+% Experiments
+set_param('master_thesis_simulink/Experiments', 'commented', 'off');
 set_param(strcat('master_thesis_simulink/Experiments/', directory), 'commented', 'off');
+all_Subsystem_Experiments = find_system('master_thesis_simulink/Experiments', 'SearchDepth', '1');
+all_Subsystem_Experiments_num = length(all_Subsystem_Experiments);
+for i = 1:all_Subsystem_Experiments_num
+
+    subsystem = all_Subsystem_Experiments(i);
+    subsystem_name = subsystem{1};
+    if (length(subsystem_name) > 35)
+        if (strcmp(subsystem_name(36:43), directory) ~= 1)
+    
+            set_param(strcat('master_thesis_simulink/Experiments/', subsystem_name(36:43)), 'commented', 'on');
+        end
+    end
+end
 set_param(strcat('master_thesis_simulink/Experiments/', directory, '/Experiments'), 'commented', 'on');
 set_param(strcat('master_thesis_simulink/Experiments/', directory, '/Model validation'), 'commented', 'on');
 set_param(strcat('master_thesis_simulink/Experiments/', directory, '/Noise estimation'), 'commented', 'off');
+
 % Comment System
 set_param('master_thesis_simulink/System', 'commented', 'on');
 
@@ -108,7 +138,7 @@ end
 
 % Clear variables
 clear eigs is_symmetric_p is_symmetric_v is_PosDef_p is_PosDef_v is_covariance_p is_covariance_v;
-
+clear all_Subsystem_Experiments all_Subsystem_Experiments_num all_Subsystem_Ros2Matlab all_Subsystem_Ros2Matlab_num subsystem_name subsystem;
 %% Measuremnet Noise
 noise.R = noise.Rp * 9000;
 

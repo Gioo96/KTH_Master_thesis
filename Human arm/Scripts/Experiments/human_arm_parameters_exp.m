@@ -60,7 +60,7 @@ sample_Time = 0.01;
 
 %% Simulation time
 
-simulink.time = 15;
+simulink.time = 50;
 
 %% Number of samples
 
